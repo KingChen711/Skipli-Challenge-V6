@@ -11,8 +11,17 @@ export class AuthController {
     private readonly authService: AuthService
   ) {}
 
+  public whoami = async (req: Request, res: Response) => {
+    return ok(res, res.locals.user)
+  }
+
   public createAccessCode = async (req: Request, res: Response) => {
-    const accessCode = await this.authService.createAccessCode(req)
-    return ok(res, accessCode)
+    await this.authService.createAccessCode(req)
+    return ok(res)
+  }
+
+  public validateAccessCode = async (req: Request, res: Response) => {
+    const user = await this.authService.validateAccessCode(req)
+    return ok(res, user)
   }
 }

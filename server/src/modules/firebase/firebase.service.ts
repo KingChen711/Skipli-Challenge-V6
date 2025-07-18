@@ -1,6 +1,6 @@
 import { injectable } from "inversify"
 
-import { getFirestore } from "../../config/firebase"
+import { getFirestore } from "../../config/firebase.config"
 
 @injectable()
 export class FirebaseService {

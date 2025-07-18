@@ -7,7 +7,7 @@ import express from "express"
 import helmet from "helmet"
 import morgan from "morgan"
 
-import initializeFirebase from "./config/firebase"
+import initializeFirebase from "./config/firebase.config"
 // import serverless from "serverless-http"
 
 import NotFoundException from "./helpers/errors/not-found.exception"

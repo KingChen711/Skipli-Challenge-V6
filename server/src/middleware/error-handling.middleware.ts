@@ -15,15 +15,18 @@ const errorHandlingMiddleware = (
   if (!err?.statusCode) err.statusCode = StatusCodes.INTERNAL_SERVER_ERROR
 
   const responseError = err.data || {
-    // stack: err.stack
+    success: false,
     statusCode: err.statusCode,
     message: err.message || StatusCodes[err.statusCode],
     errors: undefined as ValidationErrors | undefined,
+    // stack: process.env.NODE_ENV === "production" ? undefined : err.stack,
   }
 
   if (err instanceof RequestValidationException) {
     responseError.errors = err.errors
   }
+
+  console.log(err.stack)
 
   res.status(err.statusCode).json(responseError)
 }

@@ -1,7 +1,22 @@
 ###
+GET http://localhost:5000/api/auth/whoami
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIzNmY0MjQ2ZC04OWVkLTRjMTYtYmMyOS1iYWE1MTdmOGViNjYiLCJpYXQiOjE3NTI4NDI2NjksImV4cCI6MTc1MjkyOTA2OX0.I2BrGdy55VbJoIzT7Gqby4-N05TNCt-mgqsIYf30wlI
+
+
+
+###
 POST http://localhost:5000/api/auth/create-access-code
 Content-Type: application/json
 
 {
-  "phoneNumber": "0933131464"
+  "phoneNumber": "0123456789"
+}
+
+###
+POST http://localhost:5000/api/auth/validate-access-code
+Content-Type: application/json
+
+{
+  "phoneNumber": "0123456789",
+  "accessCode": "457904"
 }

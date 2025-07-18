@@ -28,6 +28,7 @@ export class SmsService {
   }
 
   public sendAccessCode = async (to: string, accessCode: string) => {
+    //TODO: implement this
     // const command = new PublishCommand({
     //   Message: `Your access code is ${accessCode}`,
     //   PhoneNumber: to,
@@ -40,6 +41,6 @@ export class SmsService {
     // })
 
     // const message = await this.snsClient.send(command)
-    console.log(`Your access code is ${accessCode}`)
+    console.log(`${to} access code is ${accessCode}`)
   }
 }
