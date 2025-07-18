@@ -11,13 +11,13 @@ import { type User } from "../types/models"
 const instructors: User[] = [
   {
     id: uuidv4(),
-    username: "john456",
+    name: "John Doe",
     phone: "0123456789",
     role: ERole.INSTRUCTOR,
   },
   {
     id: uuidv4(),
-    username: "amy123",
+    name: "Amy Smith",
     phone: "0987654321",
     role: ERole.INSTRUCTOR,
   },

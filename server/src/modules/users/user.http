@@ -1,0 +1,32 @@
+###
+GET http://localhost:5000/api/users/students
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJmMzMwMDY1ZS1iODIzLTRjOTEtOTI4YS03ODAzMGFiYzhmOTAiLCJpYXQiOjE3NTI4NDY0MzMsImV4cCI6MTc1MjkzMjgzM30.0brNcNemGHJcUzvFTpX8Bh7teOr1-Qqm9OMaRH5rfYk
+
+###
+GET http://localhost:5000/api/users/students/0933131465
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJmMzMwMDY1ZS1iODIzLTRjOTEtOTI4YS03ODAzMGFiYzhmOTAiLCJpYXQiOjE3NTI4NDY0MzMsImV4cCI6MTc1MjkzMjgzM30.0brNcNemGHJcUzvFTpX8Bh7teOr1-Qqm9OMaRH5rfYk
+
+###
+POST http://localhost:5000/api/users/add-student
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJmMzMwMDY1ZS1iODIzLTRjOTEtOTI4YS03ODAzMGFiYzhmOTAiLCJpYXQiOjE3NTI4NDY0MzMsImV4cCI6MTc1MjkzMjgzM30.0brNcNemGHJcUzvFTpX8Bh7teOr1-Qqm9OMaRH5rfYk
+Content-Type: application/json
+
+{
+  "email": "kingchenobama711@gmail.com",
+  "name": "King Chen",
+  "phone": "0933131464"
+}
+
+###
+PUT http://localhost:5000/api/users/edit-student/0933131464
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJmMzMwMDY1ZS1iODIzLTRjOTEtOTI4YS03ODAzMGFiYzhmOTAiLCJpYXQiOjE3NTI4NDY0MzMsImV4cCI6MTc1MjkzMjgzM30.0brNcNemGHJcUzvFTpX8Bh7teOr1-Qqm9OMaRH5rfYk
+Content-Type: application/json
+
+{
+  "name": "King Chen"
+}
+
+###
+DELETE http://localhost:5000/api/users/student/0933131464
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJmMzMwMDY1ZS1iODIzLTRjOTEtOTI4YS03ODAzMGFiYzhmOTAiLCJpYXQiOjE3NTI4NDY0MzMsImV4cCI6MTc1MjkzMjgzM30.0brNcNemGHJcUzvFTpX8Bh7teOr1-Qqm9OMaRH5rfYk
+Content-Type: application/json

@@ -1,0 +1,56 @@
+import express from "express"
+
+import { authorize } from "src/middleware/authorize.middleware"
+import { validateRequestData } from "src/middleware/validate-request-data.middleware"
+import { ERole } from "src/types/enum"
+
+import { container } from "../../config/inversify.config"
+import { UserController } from "./user.controller"
+import {
+  addStudentSchema,
+  deleteStudentSchema,
+  editStudentSchema,
+  getStudentSchema,
+  getStudentsSchema,
+} from "./user.validation"
+
+const router = express.Router()
+
+const userController = container.get(UserController)
+
+router.get(
+  "/students",
+  authorize([ERole.INSTRUCTOR]),
+  validateRequestData(getStudentsSchema),
+  userController.getStudents
+)
+
+router.get(
+  "/students/:phone",
+  authorize([ERole.INSTRUCTOR]),
+  validateRequestData(getStudentSchema),
+  userController.getStudent
+)
+
+router.post(
+  "/add-student",
+  authorize([ERole.INSTRUCTOR]),
+  validateRequestData(addStudentSchema),
+  userController.addStudent
+)
+
+router.put(
+  "/edit-student/:phone",
+  authorize([ERole.INSTRUCTOR]),
+  validateRequestData(editStudentSchema),
+  userController.editStudent
+)
+
+router.delete(
+  "/student/:phone",
+  authorize([ERole.INSTRUCTOR]),
+  validateRequestData(deleteStudentSchema),
+  userController.deleteStudent
+)
+
+export { router as userRoute }

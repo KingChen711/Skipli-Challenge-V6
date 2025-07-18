@@ -14,6 +14,8 @@ import NotFoundException from "./helpers/errors/not-found.exception"
 import { ok } from "./helpers/utils"
 import errorHandlingMiddleware from "./middleware/error-handling.middleware"
 import { authRoute } from "./modules/auth/auth.route"
+import { lessonRoute } from "./modules/lessons/lesson.route"
+import { userRoute } from "./modules/users/user.route"
 
 //!Just for development
 const DELAY = 0
@@ -34,6 +36,8 @@ app.use(express.static("public"))
 app.use(bodyParser.json())
 
 app.use("/api/auth", authRoute)
+app.use("/api/users", userRoute)
+app.use("/api/lessons", lessonRoute)
 
 app.get("/", (req, res) => {
   return ok(res, { message: "hello world" })
