@@ -5,6 +5,7 @@ import RequestValidationException, {
   ValidationErrors,
 } from "src/helpers/errors/request-validation.exception"
 import { PagedList } from "src/helpers/paged-list"
+import { asyncPoolAll } from "src/helpers/utils"
 import { ERole } from "src/types/enum"
 
 import NotFoundException from "../../helpers/errors/not-found.exception"
@@ -14,6 +15,7 @@ import { FirebaseService } from "../firebase/firebase.service"
 import {
   TAddStudentSchema,
   TDeleteStudentSchema,
+  TEditProfileSchema,
   TEditStudentSchema,
   TGetStudentsSchema,
 } from "./user.validation"
@@ -29,14 +31,14 @@ export class UserService {
     phone: string,
     require = false as T
   ): Promise<T extends true ? User : User | null> {
-    const userQuery = await this.firebaseService.db
+    const user = await this.firebaseService.db
       .collection("users")
       .where("phone", "==", phone)
       .limit(1)
       .get()
-
-    const user =
-      userQuery.docs.length > 0 ? (userQuery.docs[0].data() as User) : null
+      .then((snapshot) =>
+        snapshot.docs.length > 0 ? (snapshot.docs[0].data() as User) : null
+      )
 
     if (!user && require) {
       throw new NotFoundException(`User not found with phone ${phone}`)
@@ -49,14 +51,14 @@ export class UserService {
     email: string,
     require = false as T
   ): Promise<T extends true ? User : User | null> {
-    const userQuery = await this.firebaseService.db
+    const user = await this.firebaseService.db
       .collection("users")
       .where("email", "==", email)
       .limit(1)
       .get()
-
-    const user =
-      userQuery.docs.length > 0 ? (userQuery.docs[0].data() as User) : null
+      .then((snapshot) =>
+        snapshot.docs.length > 0 ? (snapshot.docs[0].data() as User) : null
+      )
 
     if (!user && require) {
       throw new NotFoundException(`User not found with email ${email}`)
@@ -69,14 +71,14 @@ export class UserService {
     id: string,
     require = false as T
   ): Promise<T extends true ? User : User | null> {
-    const userQuery = await this.firebaseService.db
+    const user = await this.firebaseService.db
       .collection("users")
       .where("id", "==", id)
       .limit(1)
       .get()
-
-    const user =
-      userQuery.docs.length > 0 ? (userQuery.docs[0].data() as User) : null
+      .then((snapshot) =>
+        snapshot.docs.length > 0 ? (snapshot.docs[0].data() as User) : null
+      )
 
     if (!user && require) {
       throw new NotFoundException(`User not found with id ${id}`)
@@ -93,21 +95,22 @@ export class UserService {
     const {
       query: { pageNumber, pageSize },
     } = dto
-    const studentQuery = await this.firebaseService.db
+    const students = await this.firebaseService.db
       .collection("users")
       .where("role", "==", ERole.STUDENT)
       .limit(pageSize)
       .offset((pageNumber - 1) * pageSize)
       .get()
+      .then((snapshot) =>
+        snapshot.docs.map((student) => student.data() as User)
+      )
 
-    const totalCountResult = await this.firebaseService.db
+    const totalCount = await this.firebaseService.db
       .collection("users")
       .where("role", "==", ERole.STUDENT)
       .count()
       .get()
-
-    const totalCount = totalCountResult.data().count
-    const students = studentQuery.docs.map((student) => student.data() as User)
+      .then((snapshot) => snapshot.data().count)
 
     const mappedStudents = students.map((student) => ({
       ...student,
@@ -122,17 +125,15 @@ export class UserService {
     phone: string,
     require = false as T
   ): Promise<T extends true ? User : User | null> {
-    const studentQuery = await this.firebaseService.db
+    const student = await this.firebaseService.db
       .collection("users")
       .where("phone", "==", phone)
       .where("role", "==", ERole.STUDENT)
       .limit(1)
       .get()
-
-    const student =
-      studentQuery.docs.length > 0
-        ? (studentQuery.docs[0].data() as User)
-        : null
+      .then((snapshot) =>
+        snapshot.docs.length > 0 ? (snapshot.docs[0].data() as User) : null
+      )
 
     if (!student && require) {
       throw new NotFoundException(`Student not found with phone ${phone}`)
@@ -207,15 +208,64 @@ export class UserService {
     const student = await this.getStudentByPhone(phone, true)
 
     await this.firebaseService.db.collection("users").doc(student.id).delete()
+    await this.firebaseService.db
+      .collection("students-lessons")
+      .where("studentId", "==", student.id)
+      .get()
+      .then((snapshot) => {
+        asyncPoolAll(10, snapshot.docs, async (doc) => {
+          await doc.ref.delete()
+        })
+      })
   }
 
-  public async getStudentIdsByPhones(phones: string[]) {
-    const studentQuery = await this.firebaseService.db
-      .collection("users")
-      .where("role", "==", ERole.STUDENT)
-      .where("phone", "in", phones)
-      .get()
+  public async getStudentIdsByPhones(phones: string[]): Promise<string[]> {
+    return (
+      await asyncPoolAll(
+        10,
+        phones,
+        async (phone) =>
+          await this.firebaseService.db
+            .collection("users")
+            .where("role", "==", ERole.STUDENT)
+            .where("phone", "==", phone)
+            .limit(1)
+            .get()
+            .then((snapshot) =>
+              snapshot.docs.length > 0
+                ? (snapshot.docs[0].data().id as string)
+                : null
+            )
+      )
+    ).filter(Boolean) as string[]
+  }
 
-    return studentQuery.docs.map((student) => student.data().id as string)
+  public async editStudentProfile(studentId: string, dto: TEditProfileSchema) {
+    const {
+      body: { name, phone, email },
+    } = dto
+
+    const userByPhone = await this.getUserByPhone(phone)
+    const userByEmail = await this.getUserByEmail(email)
+
+    const errors: ValidationErrors = {}
+
+    if (userByPhone && userByPhone.id !== studentId) {
+      errors.phone = "Phone is already in use"
+    }
+
+    if (userByEmail && userByEmail.id !== studentId) {
+      errors.email = "Email is already in use"
+    }
+
+    if (Object.keys(errors).length > 0) {
+      throw new RequestValidationException(errors)
+    }
+
+    //Not need to check if the student is exist, because the studentId is already checked in the authorize middleware
+    await this.firebaseService.db
+      .collection("users")
+      .doc(studentId)
+      .update({ name, phone, email })
   }
 }

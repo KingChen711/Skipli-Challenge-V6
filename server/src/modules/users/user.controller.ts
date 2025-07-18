@@ -38,4 +38,12 @@ export class UserController {
     await this.userService.deleteStudent(res.locals.requestData)
     return ok(res)
   }
+
+  public editStudentProfile = async (req: Request, res: Response) => {
+    await this.userService.editStudentProfile(
+      res.locals.user.id,
+      res.locals.requestData
+    )
+    return ok(res)
+  }
 }

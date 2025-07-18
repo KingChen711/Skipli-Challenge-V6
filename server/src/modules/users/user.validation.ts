@@ -52,3 +52,13 @@ export const deleteStudentSchema = z.object({
 })
 
 export type TDeleteStudentSchema = z.infer<typeof deleteStudentSchema>
+
+export const editProfileSchema = z.object({
+  body: z.object({
+    name: z.string().trim().min(3),
+    phone: phoneNumberSchema,
+    email: z.string().trim().email().min(1),
+  }),
+})
+
+export type TEditProfileSchema = z.infer<typeof editProfileSchema>

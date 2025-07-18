@@ -12,9 +12,9 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJmMzMwM
 Content-Type: application/json
 
 {
-  "email": "kingchenobama711@gmail.com",
-  "name": "King Chen",
-  "phone": "0933131464"
+  "email": "trantruongvan03@gmail.com",
+  "name": "Tran Truong Van",
+  "phone": "0933131465"
 }
 
 ###
@@ -30,3 +30,15 @@ Content-Type: application/json
 DELETE http://localhost:5000/api/users/student/0933131464
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJmMzMwMDY1ZS1iODIzLTRjOTEtOTI4YS03ODAzMGFiYzhmOTAiLCJpYXQiOjE3NTI4NDY0MzMsImV4cCI6MTc1MjkzMjgzM30.0brNcNemGHJcUzvFTpX8Bh7teOr1-Qqm9OMaRH5rfYk
 Content-Type: application/json
+
+
+###
+PUT http://localhost:5000/api/users/edit-profile
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI1YjZjNDdhYi01N2MwLTQ0NTEtOGU0YS1kMWMxYzk2MDY1YTAiLCJpYXQiOjE3NTI4NTgyNTYsImV4cCI6MTc1Mjk0NDY1Nn0.4PyBzkuxz8ggRqBb7vEznp1RRlLwR-ehP2pdH9r30qs
+Content-Type: application/json
+
+{
+  "name": "King Chen 3",
+  "phone": "0933131499",
+  "email": "kingchenobama71103@gmail.com"
+}

@@ -8,3 +8,19 @@ Content-Type: application/json
   "description": "Lesson 1 description",
   "studentPhones": ["0933131464", "0933131465"]
 }
+
+###
+GET http://localhost:5000/api/lessons/my-lessons
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI1YjZjNDdhYi01N2MwLTQ0NTEtOGU0YS1kMWMxYzk2MDY1YTAiLCJpYXQiOjE3NTI4NTgyNTYsImV4cCI6MTc1Mjk0NDY1Nn0.4PyBzkuxz8ggRqBb7vEznp1RRlLwR-ehP2pdH9r30qs
+
+###
+POST http://localhost:5000/api/lessons/mark-lesson-done
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI1YjZjNDdhYi01N2MwLTQ0NTEtOGU0YS1kMWMxYzk2MDY1YTAiLCJpYXQiOjE3NTI4NTgyNTYsImV4cCI6MTc1Mjk0NDY1Nn0.4PyBzkuxz8ggRqBb7vEznp1RRlLwR-ehP2pdH9r30qs
+Content-Type: application/json
+
+{
+  "lessonId": "9ec716cc-cbf2-46e0-80ef-b032fabfd506"
+}
+
+
+ 

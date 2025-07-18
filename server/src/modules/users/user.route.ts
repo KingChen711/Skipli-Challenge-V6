@@ -9,6 +9,7 @@ import { UserController } from "./user.controller"
 import {
   addStudentSchema,
   deleteStudentSchema,
+  editProfileSchema,
   editStudentSchema,
   getStudentSchema,
   getStudentsSchema,
@@ -44,6 +45,14 @@ router.put(
   authorize([ERole.INSTRUCTOR]),
   validateRequestData(editStudentSchema),
   userController.editStudent
+)
+
+//I do not know why, but the challenge only allow the student to edit their own profile.
+router.put(
+  "/edit-profile",
+  authorize([ERole.STUDENT]),
+  validateRequestData(editProfileSchema),
+  userController.editStudentProfile
 )
 
 router.delete(
