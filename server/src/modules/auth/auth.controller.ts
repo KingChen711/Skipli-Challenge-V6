@@ -12,7 +12,7 @@ export class AuthController {
   ) {}
 
   public createAccessCode = async (req: Request, res: Response) => {
-    const accessCode = await this.authService.createAccessCode(req.body)
+    const accessCode = await this.authService.createAccessCode(req)
     return ok(res, accessCode)
   }
 }

@@ -26,7 +26,7 @@ export default [
       "@typescript-eslint": tseslint,
     },
     rules: {
-      "no-console": "warn",
+      "no-console": "off",
       "no-unused-vars": "off",
       "@typescript-eslint/no-unsafe-argument": "off",
       "@typescript-eslint/no-unsafe-return": "off",

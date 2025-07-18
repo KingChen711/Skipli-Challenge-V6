@@ -39,12 +39,15 @@
     "vercel-build": "echo hello"
   },
   "dependencies": {
+    "@aws-sdk/client-sns": "^3.848.0",
     "@huggingface/transformers": "^3.5.2",
     "body-parser": "^1.20.2",
     "class-transformer": "^0.5.1",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "express-async-errors": "^3.1.1",
+    "firebase": "^12.0.0",
+    "firebase-admin": "^13.4.0",
     "helmet": "^7.1.0",
     "http-status-codes": "^2.3.0",
     "install": "^0.13.0",
@@ -55,7 +58,7 @@
     "reflect-metadata": "^0.2.2",
     "rimraf": "^5.0.7",
     "serverless-http": "^3.2.0",
-    "twilio": "^5.7.3",
+    "tslib": "^2.8.1",
     "zod": "^3.23.8"
   }
 }

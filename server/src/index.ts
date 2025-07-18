@@ -6,16 +6,20 @@ import bodyParser from "body-parser"
 import express from "express"
 import helmet from "helmet"
 import morgan from "morgan"
-import serverless from "serverless-http"
+
+import initializeFirebase from "./config/firebase"
+// import serverless from "serverless-http"
 
 import NotFoundException from "./helpers/errors/not-found.exception"
 import { ok } from "./helpers/utils"
 import errorHandlingMiddleware from "./middleware/error-handling.middleware"
 import { authRoute } from "./modules/auth/auth.route"
-import { embeddingRoute } from "./modules/embedding/embedding.route"
 
 //!Just for development
 const DELAY = 0
+
+// Initialize Firebase
+initializeFirebase()
 
 const app = express()
 
@@ -29,7 +33,6 @@ app.use(express.static("public"))
 
 app.use(bodyParser.json())
 
-app.use("/api/embedding", embeddingRoute)
 app.use("/api/auth", authRoute)
 
 app.get("/", (req, res) => {
@@ -44,10 +47,7 @@ app.use(errorHandlingMiddleware)
 
 const PORT = process.env.PORT || 6000
 app.listen(PORT, () => {
-  // eslint-disable-next-line no-console
   console.log(`Listening on port ${PORT}`)
 })
 
-export default app
-
-export const handler = serverless(app)
+// export const handler = serverless(app)
