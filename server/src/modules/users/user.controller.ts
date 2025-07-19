@@ -13,7 +13,6 @@ export class UserController {
 
   public getStudents = async (req: Request, res: Response) => {
     const students = await this.userService.getStudents(res.locals.requestData)
-    res.setHeader("X-Pagination", JSON.stringify(students.metaData))
     return ok(res, students)
   }
 

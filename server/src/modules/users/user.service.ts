@@ -69,6 +69,26 @@ export class UserService {
     return user as T extends true ? User : User | null
   }
 
+  public async getUserByUsername<T extends boolean>(
+    username: string,
+    require = false as T
+  ): Promise<T extends true ? User : User | null> {
+    const user = await this.firebaseService.db
+      .collection("users")
+      .where("username", "==", username)
+      .limit(1)
+      .get()
+      .then((snapshot) =>
+        snapshot.docs.length > 0 ? (snapshot.docs[0].data() as User) : null
+      )
+
+    if (!user && require) {
+      throw new NotFoundException(`User not found with username ${username}`)
+    }
+
+    return user as T extends true ? User : User | null
+  }
+
   public async getUserById<T extends boolean>(
     id: string,
     require = false as T
@@ -187,18 +207,37 @@ export class UserService {
 
   public async editStudent(dto: TEditStudentSchema) {
     const {
-      body: updatedDate,
+      body: { email, name, phone: newPhone, username },
       params: { phone },
     } = dto
-
     const student = await this.getStudentByPhone(phone, true)
+    const userByPhone = await this.getUserByPhone(newPhone)
+    const userByEmail = await this.getUserByEmail(email)
+    const userByUsername = await this.getUserByUsername(username)
 
-    Object.assign(student, updatedDate)
+    const errors: ValidationErrors = {}
+
+    if (userByPhone && userByPhone.phone !== phone) {
+      errors.phone = "Phone is already in use"
+    }
+
+    if (userByEmail && userByEmail.phone !== phone) {
+      errors.email = "Email is already in use"
+    }
+
+    if (userByUsername && userByUsername.phone !== phone) {
+      errors.username = "Username is already in use"
+    }
+
+    if (Object.keys(errors).length > 0) {
+      throw new RequestValidationException(errors)
+    }
+
+    Object.assign(student, { email, name, phone: newPhone, username })
 
     await this.updateUser(student)
   }
 
-  //TODO: Need check constraints before delete
   public async deleteStudent(dto: TDeleteStudentSchema) {
     const {
       params: { phone },

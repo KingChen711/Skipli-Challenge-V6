@@ -16,7 +16,6 @@ const corsOptions: cors.CorsOptions = {
     }
   },
   allowedHeaders: "*",
-  exposedHeaders: "X-Pagination",
 }
 
 const corsMiddleware = cors(corsOptions)

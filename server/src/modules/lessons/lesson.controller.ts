@@ -21,7 +21,6 @@ export class LessonController {
       res.locals.user.id,
       res.locals.requestData
     )
-    res.setHeader("X-Pagination", JSON.stringify(lessons.metaData))
     return ok(res, lessons)
   }
 

@@ -9,14 +9,14 @@ import { Tabs, TabsList, TabsTrigger } from '~/components/ui/tabs'
 import useCheckExistAccount, {
   checkExistAccountSchema,
   type TCheckExistAccountSchema
-} from '~/hooks/use-check-exist-account'
+} from '~/hooks/auth/use-check-exist-account'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { Badge } from '~/components/ui/badge'
-import useAuthenticate, { authenticateSchema, type TAuthenticateSchema } from '~/hooks/use-authenticate'
+import useAuthenticate, { authenticateSchema, type TAuthenticateSchema } from '~/hooks/auth/use-authenticate'
 import { useAuth } from '~/contexts/auth-provider'
-import useSendSMS from '~/hooks/use-send-sms'
-import useSendCode from '~/hooks/use-send-code'
+import useSendSMS from '~/hooks/auth/use-send-sms'
+import useSendCode from '~/hooks/auth/use-send-code'
 import { toast } from 'sonner'
 import handleHttpError from '~/lib/utils'
 import { ERole } from '~/types/models'

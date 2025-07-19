@@ -2,6 +2,7 @@ import { cn } from '~/lib/utils'
 
 export type IconProps = React.HTMLAttributes<SVGElement>
 
+//TODO: choose correct icon
 export const Icons = {
   Loader: ({ className, ...props }: IconProps) => (
     <svg
