@@ -10,6 +10,8 @@ export type User = {
   password?: string
   accessCode?: string
   role: ERole
+  setupToken?: string
+  hasSetupCompleted?: boolean
 }
 
 export type Lesson = {

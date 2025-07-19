@@ -19,3 +19,16 @@ Content-Type: application/json
   "phoneNumber": "0123456789",
   "accessCode": "457904"
 }
+
+###
+GET http://localhost:5000/api/auth/setup/verify/aa15b118ec81731a0d0fa9d03c57ef58bdd8540995248d62edea99ec03184532
+
+###
+POST http://localhost:5000/api/auth/setup/complete
+Content-Type: application/json
+
+{
+  "token": "aa15b118ec81731a0d0fa9d03c57ef58bdd8540995248d62edea99ec03184532",
+  "username": "kingchen711",
+  "password": "123456"
+}

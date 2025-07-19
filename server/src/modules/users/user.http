@@ -12,9 +12,9 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJmMzMwM
 Content-Type: application/json
 
 {
-  "email": "trantruongvan03@gmail.com",
-  "name": "Tran Truong Van",
-  "phone": "0933131465"
+  "email": "kingchenobama711@gmail.com",
+  "name": "King Chen",
+  "phone": "0933131464"
 }
 
 ###

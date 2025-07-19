@@ -10,6 +10,7 @@ import { ERole } from "src/types/enum"
 
 import NotFoundException from "../../helpers/errors/not-found.exception"
 import { User } from "../../types/models"
+import { TokenService } from "../auth/token.service"
 import { EmailService } from "../email/email.service"
 import { FirebaseService } from "../firebase/firebase.service"
 import {
@@ -24,7 +25,8 @@ import {
 export class UserService {
   constructor(
     private readonly firebaseService: FirebaseService,
-    private readonly emailService: EmailService
+    private readonly emailService: EmailService,
+    private readonly tokenService: TokenService
   ) {}
 
   public async getUserByPhone<T extends boolean>(
@@ -112,11 +114,7 @@ export class UserService {
       .get()
       .then((snapshot) => snapshot.data().count)
 
-    const mappedStudents = students.map((student) => ({
-      ...student,
-      accessCode: undefined,
-      password: undefined,
-    }))
+    const mappedStudents = students.map((student) => this.toPublicUser(student))
 
     return new PagedList<User>(mappedStudents, totalCount, pageNumber, pageSize)
   }
@@ -164,12 +162,14 @@ export class UserService {
       throw new RequestValidationException(errors)
     }
 
+    const setupToken = this.tokenService.generateSetupToken()
     const newStudent: User = {
       id: uuidv4(),
       email,
       name,
       phone,
       role: ERole.STUDENT,
+      setupToken,
     }
 
     await this.firebaseService.db
@@ -178,11 +178,10 @@ export class UserService {
       .set(newStudent)
 
     //Not need to await
-    //TODO: implement set up account for student
-    this.emailService.sendEmail(
+    this.emailService.sendAccountSetupEmail(
       newStudent.email!,
-      "Welcome to the platform",
-      `Welcome to the platform ${newStudent.name}`
+      newStudent.name,
+      setupToken
     )
   }
 
@@ -267,5 +266,12 @@ export class UserService {
       .collection("users")
       .doc(studentId)
       .update({ name, phone, email })
+  }
+
+  public toPublicUser(user: User) {
+    delete user.password
+    delete user.accessCode
+    delete user.setupToken
+    return user as User
   }
 }

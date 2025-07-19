@@ -6,8 +6,10 @@ import { validateRequestData } from "src/middleware/validate-request-data.middle
 import { container } from "../../config/inversify.config"
 import { AuthController } from "./auth.controller"
 import {
+  completeSetupSchema,
   createAccessCodeSchema,
   validateAccessCodeSchema,
+  verifySetupTokenSchema,
 } from "./auth.validation"
 
 const router = express.Router()
@@ -27,5 +29,29 @@ router.post(
   validateRequestData(validateAccessCodeSchema),
   authController.validateAccessCode
 )
+
+router.get(
+  "/setup/verify/:token",
+  validateRequestData(verifySetupTokenSchema),
+  authController.verifySetupToken
+)
+
+router.post(
+  "/setup/complete",
+  validateRequestData(completeSetupSchema),
+  authController.completeSetup
+)
+
+// router.get(
+//   "/login/check-exist-account/:phoneOrUsernameOrEmail",
+//   validateRequestData(checkExistAccountSchema),
+//   authController.checkExistAccount
+// )
+
+// router.post(
+//   "/login/password-method",
+//   validateRequestData(loginPasswordMethodSchema),
+//   authController.loginPasswordMethod
+// )
 
 export { router as authRoute }

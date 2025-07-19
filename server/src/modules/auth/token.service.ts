@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken"
 
 import "dotenv/config"
 
+import crypto from "crypto"
 import { promisify } from "util"
 
 import UnauthorizedException from "src/helpers/errors/unauthorized-exception"
@@ -26,6 +27,10 @@ export class TokenService {
       algorithm: "HS256",
       expiresIn: this.JWT_EXPIRES_IN,
     })
+  }
+
+  public generateSetupToken(length = 32) {
+    return crypto.randomBytes(length).toString("hex")
   }
 
   public verifyToken = async (
