@@ -18,15 +18,18 @@ export class AuthController {
     return ok(res, this.userService.toPublicUser(res.locals.user))
   }
 
-  public createAccessCode = async (req: Request, res: Response) => {
-    await this.authService.createAccessCode(res.locals.requestData)
-    return ok(res)
+  public sendCode = async (req: Request, res: Response) => {
+    const sentEmail = await this.authService.sendCode(res.locals.requestData)
+    return ok(res, sentEmail)
   }
 
-  public validateAccessCode = async (req: Request, res: Response) => {
-    const user = await this.authService.validateAccessCode(
-      res.locals.requestData
-    )
+  public sendSMS = async (req: Request, res: Response) => {
+    const sentPhone = await this.authService.sendSMS(res.locals.requestData)
+    return ok(res, sentPhone)
+  }
+
+  public authenticate = async (req: Request, res: Response) => {
+    const user = await this.authService.authenticate(res.locals.requestData)
     return ok(res, user)
   }
 
@@ -38,5 +41,12 @@ export class AuthController {
   public completeSetup = async (req: Request, res: Response) => {
     await this.authService.completeSetup(res.locals.requestData)
     return ok(res)
+  }
+
+  public checkExistAccount = async (req: Request, res: Response) => {
+    const exist = await this.authService.checkExistAccount(
+      res.locals.requestData
+    )
+    return ok(res, exist)
   }
 }

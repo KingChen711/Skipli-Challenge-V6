@@ -24,7 +24,7 @@ export const addStudentSchema = z.object({
   body: z.object({
     phone: phoneNumberSchema,
     name: z.string().trim().min(3),
-    email: z.string().trim().email().min(1),
+    email: z.string().trim().email().toLowerCase().min(1),
   }),
 })
 
@@ -57,7 +57,7 @@ export const editProfileSchema = z.object({
   body: z.object({
     name: z.string().trim().min(3),
     phone: phoneNumberSchema,
-    email: z.string().trim().email().min(1),
+    email: z.string().trim().email().toLowerCase().min(1),
   }),
 })
 

@@ -13,7 +13,7 @@ export type HttpResponse<TData = undefined> = TData extends undefined
   ? { success: true }
   : { success: true; data: TData }
 
-type HttpError =
+export type HttpError =
   | { success: false; typeError: 'unknown' }
   | {
       success: false

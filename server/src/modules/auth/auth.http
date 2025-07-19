@@ -4,11 +4,21 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIzNmY0M
 
 
 ###
-POST http://localhost:5000/api/auth/create-access-code
+POST http://localhost:5000/api/auth/send-code
 Content-Type: application/json
 
 {
-  "phoneNumber": "0123456789"
+  "type": "phone",
+  "identifier": "0933131464"
+}
+
+###
+POST http://localhost:5000/api/auth/send-sms
+Content-Type: application/json
+
+{
+  "type": "username",
+  "identifier": "kingchen711"
 }
 
 ###
@@ -31,4 +41,13 @@ Content-Type: application/json
   "token": "aa15b118ec81731a0d0fa9d03c57ef58bdd8540995248d62edea99ec03184532",
   "username": "kingchen711",
   "password": "123456"
+}
+
+###
+POST http://localhost:5000/api/auth/check-exist-account
+Content-Type: application/json
+
+{
+  "type": "username",
+  "identifier": "kingchen711"
 }

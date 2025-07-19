@@ -6,9 +6,9 @@ import { validateRequestData } from "src/middleware/validate-request-data.middle
 import { container } from "../../config/inversify.config"
 import { AuthController } from "./auth.controller"
 import {
+  authenticateSchema,
+  checkExistAccountSchema,
   completeSetupSchema,
-  createAccessCodeSchema,
-  validateAccessCodeSchema,
   verifySetupTokenSchema,
 } from "./auth.validation"
 
@@ -19,15 +19,21 @@ const authController = container.get(AuthController)
 router.get("/whoami", authorize(), authController.whoami)
 
 router.post(
-  "/create-access-code",
-  validateRequestData(createAccessCodeSchema),
-  authController.createAccessCode
+  "/send-code",
+  validateRequestData(checkExistAccountSchema),
+  authController.sendCode
 )
 
 router.post(
-  "/validate-access-code",
-  validateRequestData(validateAccessCodeSchema),
-  authController.validateAccessCode
+  "/send-sms",
+  validateRequestData(checkExistAccountSchema),
+  authController.sendSMS
+)
+
+router.post(
+  "/authenticate",
+  validateRequestData(authenticateSchema),
+  authController.authenticate
 )
 
 router.get(
@@ -42,11 +48,11 @@ router.post(
   authController.completeSetup
 )
 
-// router.get(
-//   "/login/check-exist-account/:phoneOrUsernameOrEmail",
-//   validateRequestData(checkExistAccountSchema),
-//   authController.checkExistAccount
-// )
+router.post(
+  "/check-exist-account",
+  validateRequestData(checkExistAccountSchema),
+  authController.checkExistAccount
+)
 
 // router.post(
 //   "/login/password-method",

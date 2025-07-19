@@ -274,4 +274,39 @@ export class UserService {
     delete user.setupToken
     return user as User
   }
+
+  public async getUserByIdentifier<T extends boolean>(
+    type: "email" | "phone" | "username",
+    identifier: string,
+    require = false as T
+  ): Promise<T extends true ? User : User | null> {
+    const collection = this.firebaseService.db.collection("users")
+    let query
+    switch (type) {
+      case "email":
+        query = collection.where("email", "==", identifier)
+        break
+      case "phone":
+        query = collection.where("phone", "==", identifier)
+        break
+      case "username":
+        query = collection.where("username", "==", identifier)
+        break
+    }
+
+    const user = query
+      ? ((await query
+          .limit(1)
+          .get()
+          .then((snapshot) =>
+            snapshot.docs.length > 0 ? (snapshot.docs[0].data() as User) : null
+          )) as User)
+      : null
+
+    if (!user && require) {
+      throw new NotFoundException(`User not found with ${type} ${identifier}`)
+    }
+
+    return user as T extends true ? User : User | null
+  }
 }

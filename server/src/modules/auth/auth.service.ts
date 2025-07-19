@@ -2,16 +2,18 @@ import bcrypt from "bcrypt"
 import { injectable } from "inversify"
 
 import BadRequestException from "src/helpers/errors/bad-request.exception"
+import RequestValidationException from "src/helpers/errors/request-validation.exception"
 import UnauthorizedException from "src/helpers/errors/unauthorized-exception"
 import { ERole } from "src/types/enum"
 import { User } from "src/types/models"
 
+import { EmailService } from "../email/email.service"
 import { FirebaseService } from "../firebase/firebase.service"
 import { UserService } from "../users/user.service"
 import {
+  TAuthenticateSchema,
+  TCheckExistAccountSchema,
   TCompleteSetupSchema,
-  TCreateAccessCodeSchema,
-  TValidateAccessCodeSchema,
   TVerifySetupTokenSchema,
 } from "./auth.validation"
 import { SmsService } from "./sms.service"
@@ -23,52 +25,32 @@ export class AuthService {
     private readonly smsService: SmsService,
     private readonly tokenService: TokenService,
     private readonly userService: UserService,
-    private readonly firebaseService: FirebaseService
+    private readonly firebaseService: FirebaseService,
+    private readonly emailService: EmailService
   ) {}
 
-  public createAccessCode = async (dto: TCreateAccessCodeSchema) => {
+  public authenticate = async (dto: TAuthenticateSchema) => {
     const {
-      body: { phoneNumber },
+      body: { type, identifier, authType, authValue },
     } = dto
-    const user = await this.userService.getUserByPhone(phoneNumber, true)
+    const user = await this.userService.getUserByIdentifier(
+      type,
+      identifier,
+      true
+    )
 
-    //!As I understand after reading the requirements, this API endpoint is only used by Instructors or Students who have completed setup.
-    if (user.role === ERole.STUDENT && !user.hasSetupCompleted) {
+    if (user && user.role === ERole.STUDENT && !user.hasSetupCompleted) {
       throw new BadRequestException(
         "You have not completed setup account. Please check your email for setup instructions."
       )
     }
 
-    //Generate and set access code for user
-    const accessCode = Math.floor(100000 + Math.random() * 900000).toString()
-    user.accessCode = accessCode
-    await this.userService.updateUser(user)
-
-    //Not need to await this task
-    this.smsService.sendAccessCode(phoneNumber, accessCode)
-  }
-
-  public validateAccessCode = async (dto: TValidateAccessCodeSchema) => {
-    const {
-      body: { accessCode, phoneNumber },
-    } = dto
-    const user = await this.userService.getUserByPhone(phoneNumber, true)
-
-    //!As I understand after reading the requirements, this API endpoint is only used by Instructors or Students who have completed setup.
-    if (user.role === ERole.STUDENT && !user.hasSetupCompleted) {
-      throw new BadRequestException(
-        "You have not completed setup account. Please check your email for setup instructions."
-      )
+    if (authType === "password") {
+      await this.authenticateByPassword(user, authValue)
+    } else {
+      await this.authenticateByCode(user, authValue)
     }
 
-    //Check if access code is correct
-    if (user.accessCode !== accessCode.toString()) {
-      throw new UnauthorizedException("Invalid access code")
-    }
-
-    //Remove access code from user object
-    //Normally I prefer undefined for performance but firestore doesn't accept undefined values
-    // user.accessCode = undefined
     delete user.accessCode
 
     await this.userService.updateUser(user)
@@ -77,6 +59,29 @@ export class AuthService {
 
     return {
       accessToken: token,
+      phone: user.phone,
+      role: user.role,
+    }
+  }
+
+  private async authenticateByPassword(user: User, password: string) {
+    if (!user.password) {
+      throw new BadRequestException("This account is not set password yet")
+    }
+    const isPasswordValid = await bcrypt.compare(password, user.password)
+    if (!isPasswordValid) {
+      throw new RequestValidationException({
+        authValue: "Wrong password",
+      })
+    }
+  }
+
+  private async authenticateByCode(user: User, accessCode: string) {
+    //Check if access code is correct
+    if (user.accessCode !== accessCode.toString()) {
+      throw new RequestValidationException({
+        authValue: "Invalid code",
+      })
     }
   }
 
@@ -126,6 +131,86 @@ export class AuthService {
     delete user.setupToken
 
     await this.userService.updateUser(user)
+  }
+
+  public checkExistAccount = async (dto: TCheckExistAccountSchema) => {
+    const {
+      body: { type, identifier },
+    } = dto
+
+    const user = await this.userService.getUserByIdentifier(type, identifier)
+
+    if (user && user.role === ERole.STUDENT && !user.hasSetupCompleted) {
+      throw new BadRequestException(
+        "You have not completed setup account. Please check your email for setup instructions."
+      )
+    }
+
+    return !!user
+  }
+
+  public sendCode = async (dto: TCheckExistAccountSchema) => {
+    const {
+      body: { type, identifier },
+    } = dto
+
+    const user = await this.userService.getUserByIdentifier(
+      type,
+      identifier,
+      true
+    )
+
+    if (user.role === ERole.STUDENT && !user.hasSetupCompleted) {
+      throw new BadRequestException(
+        "You have not completed setup account. Please check your email for setup instructions."
+      )
+    }
+
+    if (!user.email) {
+      throw new BadRequestException("This account is not set email yet")
+    }
+
+    //Generate and set access code for user
+    const accessCode = Math.floor(100000 + Math.random() * 900000).toString()
+    user.accessCode = accessCode
+    await this.userService.updateUser(user)
+
+    //Not need to await this task
+    this.emailService.sendAccessCode(user.email, accessCode)
+
+    return user.email
+  }
+
+  public sendSMS = async (dto: TCheckExistAccountSchema) => {
+    const {
+      body: { type, identifier },
+    } = dto
+
+    const user = await this.userService.getUserByIdentifier(
+      type,
+      identifier,
+      true
+    )
+
+    if (user.role === ERole.STUDENT && !user.hasSetupCompleted) {
+      throw new BadRequestException(
+        "You have not completed setup account. Please check your email for setup instructions."
+      )
+    }
+
+    if (!user.phone) {
+      throw new BadRequestException("This account is not set phone yet")
+    }
+
+    //Generate and set access code for user
+    const accessCode = Math.floor(100000 + Math.random() * 900000).toString()
+    user.accessCode = accessCode
+    await this.userService.updateUser(user)
+
+    //Not need to await this task
+    this.smsService.sendAccessCode(user.phone, accessCode)
+
+    return user.phone
   }
 
   // public login = async (dto: TLoginSchema) => {

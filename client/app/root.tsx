@@ -4,6 +4,7 @@ import type { Route } from './+types/root'
 import './app.css'
 import { ReactQueryProvider } from './contexts/react-query-provider'
 import AuthProvider from './contexts/auth-provider'
+import { Toaster } from './components/ui/sonner'
 
 export const links: Route.LinksFunction = () => [
   { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
@@ -29,7 +30,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         <ReactQueryProvider>
-          <AuthProvider>{children}</AuthProvider>
+          <AuthProvider>
+            {children}
+            <Toaster />
+          </AuthProvider>
         </ReactQueryProvider>
         <ScrollRestoration />
         <Scripts />

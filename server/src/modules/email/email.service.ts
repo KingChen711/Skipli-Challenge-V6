@@ -117,4 +117,57 @@ export class EmailService {
 
     await this.sendEmail(emailData)
   }
+
+  public async sendAccessCode(email: string, accessCode: string) {
+    const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Your Access Code</title>
+      <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: #6246ea; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }
+        .content { background: #f9fafb; padding: 30px; border-radius: 0 0 8px 8px; }
+        .code { font-size: 24px; font-weight: bold; color: #6246ea; text-align: center; margin: 20px 0; }
+        .footer { margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb; font-size: 14px; color: #6b7280; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <h1>Your Access Code</h1>
+        </div>
+        <div class="content">
+          <p>Your access code is:</p>
+          <div class="code">${accessCode}</div> 
+          <p>If you didn't request this code, please ignore this email.</p>
+          <p>Best regards,<br>The Learning Platform Team</p>
+        </div>
+        <div class="footer">
+          <p>This is an automated email. Please do not reply to this message.</p>
+        </div>
+      </div>
+    </body>
+    </html>
+    `
+
+    const text = `
+    Your access code is: ${accessCode}
+    If you didn't request this code, please ignore this email.
+    Best regards,
+    The Learning Platform Team
+  `
+
+    const emailData: TEmailTemplate = {
+      to: email,
+      subject: "Your Access Code",
+      html,
+      text,
+    }
+
+    await this.sendEmail(emailData)
+  }
 }

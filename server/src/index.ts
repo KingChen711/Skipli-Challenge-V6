@@ -13,6 +13,7 @@ import initializeFirebase from "./config/firebase.config"
 import { container } from "./config/inversify.config"
 import NotFoundException from "./helpers/errors/not-found.exception"
 import { ok } from "./helpers/utils"
+import corsMiddleware from "./middleware/cors.middleware"
 import errorHandlingMiddleware from "./middleware/error-handling.middleware"
 import { authRoute } from "./modules/auth/auth.route"
 import { TokenService } from "./modules/auth/token.service"
@@ -73,6 +74,7 @@ app.use(morgan("dev"))
 app.use(express.static("public"))
 
 app.use(bodyParser.json())
+app.use(corsMiddleware)
 
 app.use("/api/auth", authRoute)
 app.use("/api/users", userRoute)
