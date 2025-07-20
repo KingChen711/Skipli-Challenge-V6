@@ -24,6 +24,8 @@ type Props = {
   pageIndexKey?: string
   pageSizeKey?: string
   className?: string
+  onPaginate?: (page: number) => void
+  onChangePageSize?: (size: '5' | '10' | '30' | '50' | '100') => void
 }
 
 function Paginator({
@@ -33,13 +35,19 @@ function Paginator({
   totalCount,
   pageIndexKey = 'pageIndex',
   pageSizeKey = 'pageSize',
-  className
+  className,
+  onPaginate,
+  onChangePageSize
 }: Props) {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const [open, setOpen] = useState(false)
 
   const paginate = ({ selected }: { selected: number }) => {
+    if (onPaginate) {
+      onPaginate(selected + 1)
+      return
+    }
     const newUrl = formUrlQuery({
       params: searchParams.toString(),
       updates: {
@@ -54,6 +62,15 @@ function Paginator({
   }
 
   const handleChangeRowsPerPage = (pageSize: string) => {
+    if (onChangePageSize) {
+      setOpen(false)
+      onChangePageSize(pageSize as '5' | '10' | '30' | '50' | '100')
+      if (onPaginate) {
+        onPaginate(1)
+        return
+      }
+      return
+    }
     const newUrl = formUrlQuery({
       params: searchParams.toString(),
       updates: {

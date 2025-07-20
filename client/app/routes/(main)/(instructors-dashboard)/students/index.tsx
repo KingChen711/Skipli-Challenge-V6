@@ -4,7 +4,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '~
 import useStudents from '~/hooks/students/use-students'
 import z from 'zod'
 import Paginator from '~/components/ui/paginator'
-import RoleBadge from '~/components/ui/role-badge'
+import RoleBadge from '~/components/ui/badges/role-badge'
 
 import SkeletonTable from '~/components/ui/skeleton-table'
 import AddStudentDialog from './_components/add-student-dialog'
@@ -18,7 +18,7 @@ export const searchStudentsSchema = z.object({
 
 export type TSearchStudentsSchema = z.infer<typeof searchStudentsSchema>
 
-function Students() {
+function StudentsPage() {
   const [searchParams] = useSearchParams()
 
   const { pageIndex, pageSize, ...rest } = searchStudentsSchema.parse(Object.fromEntries(searchParams.entries()))
@@ -57,7 +57,7 @@ function Students() {
                   <TableHead>Phone</TableHead>
                   <TableHead>Email</TableHead>
                   <TableHead>Username</TableHead>
-                  <TableHead>Role</TableHead>
+                  <TableHead position='center'>Role</TableHead>
                   <TableHead position='center'>Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -68,7 +68,7 @@ function Students() {
                     <TableCell>{student.phone || '-'}</TableCell>
                     <TableCell>{student.email || '-'}</TableCell>
                     <TableCell>{student.username || '-'}</TableCell>
-                    <TableCell>
+                    <TableCell position='center'>
                       <RoleBadge status={student.role} />
                     </TableCell>
                     <TableCell position='center'>
@@ -93,4 +93,4 @@ function Students() {
   )
 }
 
-export default Students
+export default StudentsPage

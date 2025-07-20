@@ -1,13 +1,12 @@
 import { injectable } from "inversify"
 import { v4 as uuidv4 } from "uuid"
 
-import BadRequestException from "src/helpers/errors/bad-request.exception"
-
+import BadRequestException from "../../helpers/errors/bad-request.exception"
 import { Message, User } from "../../types/models"
 import { FirebaseService } from "../firebase/firebase.service"
 import { UserService } from "../users/user.service"
 import { TSendMessageSchema } from "./chat.validation"
-import { SocketService } from "./socker.service"
+import { SocketService } from "./socket.service"
 
 @injectable()
 export class ChatService {

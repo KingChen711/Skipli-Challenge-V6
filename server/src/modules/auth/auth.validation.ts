@@ -1,6 +1,6 @@
 import { z } from "zod"
 
-import { phoneNumberSchema } from "src/helpers/validation"
+import { phoneNumberSchema, usernameSchema } from "../../helpers/validation"
 
 export const createAccessCodeSchema = z.object({
   body: z.object({
@@ -30,7 +30,7 @@ export type TVerifySetupTokenSchema = z.infer<typeof verifySetupTokenSchema>
 export const completeSetupSchema = z.object({
   body: z.object({
     token: z.string().trim().min(1),
-    username: z.string().trim().toLowerCase().min(3),
+    username: usernameSchema,
     password: z.string().trim().min(6),
   }),
 })

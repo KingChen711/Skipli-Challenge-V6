@@ -32,4 +32,16 @@ export class LessonController {
 
     return ok(res)
   }
+
+  public getLessons = async (req: Request, res: Response) => {
+    const lessons = await this.lessonService.getLessons(res.locals.requestData)
+    return ok(res, lessons)
+  }
+
+  public getLessonStudents = async (req: Request, res: Response) => {
+    const students = await this.lessonService.getLessonStudents(
+      res.locals.requestData
+    )
+    return ok(res, students)
+  }
 }

@@ -1,13 +1,14 @@
 import express from "express"
 
-import { authorize } from "src/middleware/authorize.middleware"
-import { validateRequestData } from "src/middleware/validate-request-data.middleware"
-import { ERole } from "src/types/enum"
-
 import { container } from "../../config/inversify.config"
+import { authorize } from "../../middleware/authorize.middleware"
+import { validateRequestData } from "../../middleware/validate-request-data.middleware"
+import { ERole } from "../../types/enum"
 import { LessonController } from "./lesson.controller"
 import {
   assignLessonSchema,
+  getLessonsSchema,
+  getLessonStudentsSchema,
   getMyLessonsSchema,
   markLessonDoneSchema,
 } from "./lesson.validation"
@@ -39,6 +40,20 @@ router.post(
   authorize([ERole.STUDENT]),
   validateRequestData(markLessonDoneSchema),
   lessonController.markLessonDone
+)
+
+router.get(
+  "/:id/students",
+  authorize([ERole.INSTRUCTOR]),
+  validateRequestData(getLessonStudentsSchema),
+  lessonController.getLessonStudents
+)
+
+router.get(
+  "/",
+  authorize([ERole.INSTRUCTOR]),
+  validateRequestData(getLessonsSchema),
+  lessonController.getLessons
 )
 
 export { router as lessonRoute }

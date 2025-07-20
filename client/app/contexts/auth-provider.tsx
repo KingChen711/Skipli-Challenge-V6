@@ -1,4 +1,4 @@
-import React, { createContext, useContext } from 'react'
+import React, { createContext, useContext, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import type { User } from '~/types/models'
 import { useLocalStorage } from 'usehooks-ts'
@@ -21,7 +21,7 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
   const [accessToken, setAccessToken] = useLocalStorage<string | null>('access-token', null)
 
   const { data: user, isLoading: isLoadingUser } = useQuery({
-    queryKey: ['auth', 'who-am-i', accessToken],
+    queryKey: ['whoami', accessToken],
     queryFn: async () => {
       return await http
         .get<User>('/api/auth/whoami', {
@@ -34,6 +34,12 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
     },
     enabled: !!accessToken
   })
+
+  useEffect(() => {
+    if (user?.phone) {
+      window.localStorage.setItem('phone', user.phone)
+    }
+  }, [user])
 
   return (
     <AuthContext.Provider

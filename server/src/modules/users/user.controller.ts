@@ -45,4 +45,11 @@ export class UserController {
     )
     return ok(res)
   }
+
+  public getStudentLessons = async (req: Request, res: Response) => {
+    const lessons = await this.userService.getStudentLessons(
+      res.locals.requestData
+    )
+    return ok(res, lessons)
+  }
 }

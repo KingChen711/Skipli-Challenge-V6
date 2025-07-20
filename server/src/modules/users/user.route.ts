@@ -1,10 +1,10 @@
 import express from "express"
 
-import { authorize } from "src/middleware/authorize.middleware"
-import { validateRequestData } from "src/middleware/validate-request-data.middleware"
-import { ERole } from "src/types/enum"
-
 import { container } from "../../config/inversify.config"
+import { authorize } from "../../middleware/authorize.middleware"
+import { validateRequestData } from "../../middleware/validate-request-data.middleware"
+import { ERole } from "../../types/enum"
+import { getStudentLessonsSchema } from "../lessons/lesson.validation"
 import { UserController } from "./user.controller"
 import {
   addStudentSchema,
@@ -53,6 +53,13 @@ router.put(
   authorize([ERole.STUDENT]),
   validateRequestData(editProfileSchema),
   userController.editStudentProfile
+)
+
+router.get(
+  "/students/:phone/lessons",
+  authorize([ERole.INSTRUCTOR]),
+  validateRequestData(getStudentLessonsSchema),
+  userController.getStudentLessons
 )
 
 router.delete(

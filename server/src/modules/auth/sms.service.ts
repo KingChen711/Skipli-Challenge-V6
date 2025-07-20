@@ -1,4 +1,4 @@
-import { SNSClient } from "@aws-sdk/client-sns"
+import { PublishCommand, SNSClient } from "@aws-sdk/client-sns"
 import { injectable } from "inversify"
 
 import "dotenv/config"
@@ -29,19 +29,15 @@ export class SmsService {
 
   public sendAccessCode = async (to: string, accessCode: string) => {
     try {
-      //TODO: implement this
-      // const command = new PublishCommand({
-      //   Message: `Your access code is ${accessCode}`,
-      //   PhoneNumber: to,
-      //   MessageAttributes: {
-      //     "AWS.SNS.SMS.SenderID": {
-      //       DataType: "String",
-      //       StringValue: "String",
-      //     },
-      //   },
-      // })
+      //!: Only send to Vietnam phone numbers (note this in readme)
+      //!: I can still create an input so the user can select an international phone number by selecting the prefix first. But I'll keep this challenge simple.
+      const command = new PublishCommand({
+        Message: `Your access code is ${accessCode}`,
+        PhoneNumber: `+84${to.slice(1)}`,
+      })
 
-      // const message = await this.snsClient.send(command)
+      const message = await this.snsClient.send(command)
+      console.log(`Sent SMS ${message.MessageId}`)
       console.log(`Sent SMS to ${to} with access code ${accessCode}`)
     } catch (error) {
       console.error(`Error sending SMS to ${to}: ${error}`)

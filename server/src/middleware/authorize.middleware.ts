@@ -2,12 +2,11 @@ import "dotenv/config"
 
 import { type NextFunction, type Request, type Response } from "express"
 
-import { TokenService } from "src/modules/auth/token.service"
-import { UserService } from "src/modules/users/user.service"
-
 import { container } from "../config/inversify.config"
 import ForbiddenException from "../helpers/errors/forbidden-exception"
 import UnauthorizedException from "../helpers/errors/unauthorized-exception"
+import { TokenService } from "../modules/auth/token.service"
+import { UserService } from "../modules/users/user.service"
 import { type ERole } from "../types/enum"
 
 const authorize =

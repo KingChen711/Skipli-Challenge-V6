@@ -6,7 +6,7 @@ import "dotenv/config"
 import crypto from "crypto"
 import { promisify } from "util"
 
-import UnauthorizedException from "src/helpers/errors/unauthorized-exception"
+import UnauthorizedException from "../../helpers/errors/unauthorized-exception"
 
 const sign = promisify(jwt.sign).bind(jwt)
 const verify = promisify(jwt.verify).bind(jwt)

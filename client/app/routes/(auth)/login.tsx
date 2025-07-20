@@ -86,7 +86,6 @@ function Login() {
       })
       if (res.success) {
         setAccessToken(res.data.accessToken)
-        window.localStorage.setItem('phone', res.data.phone)
         if (res.data.role === ERole.STUDENT) {
           navigate('/my-lessons')
         } else {

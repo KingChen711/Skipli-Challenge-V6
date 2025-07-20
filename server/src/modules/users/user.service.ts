@@ -1,18 +1,18 @@
 import { injectable } from "inversify"
 import { v4 as uuidv4 } from "uuid"
 
+import NotFoundException from "../../helpers/errors/not-found.exception"
 import RequestValidationException, {
   ValidationErrors,
-} from "src/helpers/errors/request-validation.exception"
-import { PagedList } from "src/helpers/paged-list"
-import { asyncPoolAll } from "src/helpers/utils"
-import { ERole } from "src/types/enum"
-
-import NotFoundException from "../../helpers/errors/not-found.exception"
-import { User } from "../../types/models"
+} from "../../helpers/errors/request-validation.exception"
+import { PagedList } from "../../helpers/paged-list"
+import { asyncPoolAll } from "../../helpers/utils"
+import { ERole, EStudentLessonStatus } from "../../types/enum"
+import { Lesson, StudentLesson, User } from "../../types/models"
 import { TokenService } from "../auth/token.service"
 import { EmailService } from "../email/email.service"
 import { FirebaseService } from "../firebase/firebase.service"
+import { TGetStudentLessonsSchema } from "../lessons/lesson.validation"
 import {
   TAddStudentSchema,
   TDeleteStudentSchema,
@@ -20,6 +20,8 @@ import {
   TEditStudentSchema,
   TGetStudentsSchema,
 } from "./user.validation"
+
+type TStudentLesson = Lesson & { status: EStudentLessonStatus }
 
 @injectable()
 export class UserService {
@@ -261,7 +263,7 @@ export class UserService {
     return (
       await asyncPoolAll(
         10,
-        phones,
+        [...new Set(phones)],
         async (phone) =>
           await this.firebaseService.db
             .collection("users")
@@ -280,11 +282,12 @@ export class UserService {
 
   public async editStudentProfile(studentId: string, dto: TEditProfileSchema) {
     const {
-      body: { name, phone, email },
+      body: { name, phone, email, username },
     } = dto
 
     const userByPhone = await this.getUserByPhone(phone)
     const userByEmail = await this.getUserByEmail(email)
+    const userByUsername = await this.getUserByUsername(username)
 
     const errors: ValidationErrors = {}
 
@@ -296,6 +299,10 @@ export class UserService {
       errors.email = "Email is already in use"
     }
 
+    if (userByUsername && userByUsername.id !== studentId) {
+      errors.username = "Username is already in use"
+    }
+
     if (Object.keys(errors).length > 0) {
       throw new RequestValidationException(errors)
     }
@@ -304,7 +311,7 @@ export class UserService {
     await this.firebaseService.db
       .collection("users")
       .doc(studentId)
-      .update({ name, phone, email })
+      .update({ name, phone, email, username })
   }
 
   public toPublicUser(user: User) {
@@ -347,5 +354,59 @@ export class UserService {
     }
 
     return user as T extends true ? User : User | null
+  }
+
+  public async getStudentLessons(dto: TGetStudentLessonsSchema) {
+    const {
+      params: { phone },
+      query: { pageNumber, pageSize },
+    } = dto
+
+    const studentId = await this.getStudentByPhone(phone, true).then(
+      (student) => student.id
+    )
+
+    const studentLessons = await this.firebaseService.db
+      .collection("students-lessons")
+      .where("studentId", "==", studentId)
+      .get()
+      .then((snapshot) =>
+        snapshot.docs.map((doc) => doc.data() as StudentLesson)
+      )
+
+    const totalCount = studentLessons.length
+
+    const queriedStudentLessons = studentLessons.slice(
+      (pageNumber - 1) * pageSize,
+      pageNumber * pageSize
+    )
+
+    const lessons = (
+      await asyncPoolAll(
+        10,
+        queriedStudentLessons,
+        async (studentLesson) =>
+          await this.firebaseService.db
+            .collection("lessons")
+            .where("id", "==", studentLesson.lessonId)
+            .limit(1)
+            .get()
+            .then((snapshot) =>
+              snapshot.docs.length > 0
+                ? ({
+                    ...snapshot.docs[0].data(),
+                    status: studentLesson.status,
+                  } as TStudentLesson)
+                : null
+            )
+      )
+    ).filter(Boolean) as TStudentLesson[]
+
+    return new PagedList<TStudentLesson>(
+      lessons,
+      totalCount,
+      pageNumber,
+      pageSize
+    )
   }
 }

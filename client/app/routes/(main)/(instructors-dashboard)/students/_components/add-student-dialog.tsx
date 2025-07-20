@@ -32,7 +32,12 @@ function AddStudentDialog() {
   }
 
   const form = useForm<TAddStudentSchema>({
-    resolver: zodResolver(addStudentSchema)
+    resolver: zodResolver(addStudentSchema),
+    defaultValues: {
+      name: '',
+      phone: '',
+      email: ''
+    }
   })
 
   const onSubmit = async (values: TAddStudentSchema) => {
@@ -42,6 +47,7 @@ function AddStudentDialog() {
       toast.success('Student added successfully')
       setOpen(false)
       queryClient.invalidateQueries({ queryKey: ['students'] })
+      form.reset()
       return
     }
 

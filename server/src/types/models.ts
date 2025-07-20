@@ -1,11 +1,10 @@
 import { type ERole, type EStudentLessonStatus } from "./enum"
 
-//TODO: check unique fields involve auth
 export type User = {
   id: string
-  phone: string //!unique
-  username?: string //!unique
-  email?: string //!unique
+  phone: string
+  username?: string
+  email?: string
   name: string
   password?: string
   accessCode?: string

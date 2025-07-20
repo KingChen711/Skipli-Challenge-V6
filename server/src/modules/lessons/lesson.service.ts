@@ -1,16 +1,17 @@
 import { injectable } from "inversify"
 import { v4 as uuidv4 } from "uuid"
 
-import BadRequestException from "src/helpers/errors/bad-request.exception"
-import { PagedList } from "src/helpers/paged-list"
-import { asyncPoolAll } from "src/helpers/utils"
-import { EStudentLessonStatus } from "src/types/enum"
-
-import { Lesson, StudentLesson } from "../../types/models"
+import BadRequestException from "../../helpers/errors/bad-request.exception"
+import { PagedList } from "../../helpers/paged-list"
+import { asyncPoolAll } from "../../helpers/utils"
+import { ERole, EStudentLessonStatus } from "../../types/enum"
+import { Lesson, StudentLesson, User } from "../../types/models"
 import { FirebaseService } from "../firebase/firebase.service"
 import { UserService } from "../users/user.service"
 import {
   TAssignLessonSchema,
+  TGetLessonsSchema,
+  TGetLessonStudentsSchema,
   TGetMyLessonsSchema,
   TMarkLessonDoneSchema,
 } from "./lesson.validation"
@@ -139,4 +140,79 @@ export class LessonService {
         status: EStudentLessonStatus.COMPLETED,
       })
   }
+
+  public async getLessons(dto: TGetLessonsSchema) {
+    const {
+      query: { pageNumber, pageSize },
+    } = dto
+    const lessons = await this.firebaseService.db
+      .collection("lessons")
+      .limit(pageSize)
+      .offset((pageNumber - 1) * pageSize)
+      .get()
+      .then((snapshot) =>
+        snapshot.docs.map((lesson) => lesson.data() as Lesson)
+      )
+
+    const totalCount = await this.firebaseService.db
+      .collection("lessons")
+      .count()
+      .get()
+      .then((snapshot) => snapshot.data().count)
+
+    return new PagedList<Lesson>(lessons, totalCount, pageNumber, pageSize)
+  }
+
+  public async getLessonStudents(dto: TGetLessonStudentsSchema) {
+    const {
+      params: { id },
+      query: { pageNumber, pageSize },
+    } = dto
+
+    const studentLessons = await this.firebaseService.db
+      .collection("students-lessons")
+      .where("lessonId", "==", id)
+      .get()
+      .then((snapshot) =>
+        snapshot.docs.map((doc) => doc.data() as StudentLesson)
+      )
+
+    const totalCount = studentLessons.length
+
+    const queriedStudentLessons = studentLessons.slice(
+      (pageNumber - 1) * pageSize,
+      pageNumber * pageSize
+    )
+
+    const students = (
+      await asyncPoolAll(
+        10,
+        queriedStudentLessons,
+        async (studentLesson) =>
+          await this.firebaseService.db
+            .collection("users")
+            .where("role", "==", ERole.STUDENT)
+            .where("id", "==", studentLesson.studentId)
+            .limit(1)
+            .get()
+            .then((snapshot) =>
+              snapshot.docs.length > 0
+                ? ({
+                    ...snapshot.docs[0].data(),
+                    status: studentLesson.status,
+                  } as TStudentLesson)
+                : null
+            )
+      )
+    ).filter(Boolean) as TStudentLesson[]
+
+    return new PagedList<TStudentLesson>(
+      students,
+      totalCount,
+      pageNumber,
+      pageSize
+    )
+  }
 }
+
+type TStudentLesson = User & { status: EStudentLessonStatus }

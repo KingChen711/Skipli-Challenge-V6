@@ -3,9 +3,8 @@ import "reflect-metadata"
 
 import { v4 as uuidv4 } from "uuid"
 
-import { ERole } from "src/types/enum"
-
 import initializeFirebase, { getFirestore } from "../config/firebase.config"
+import { ERole } from "../types/enum"
 import { type User } from "../types/models"
 
 const instructors: User[] = [

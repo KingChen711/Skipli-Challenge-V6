@@ -1,12 +1,11 @@
 import bcrypt from "bcrypt"
 import { injectable } from "inversify"
 
-import BadRequestException from "src/helpers/errors/bad-request.exception"
-import RequestValidationException from "src/helpers/errors/request-validation.exception"
-import UnauthorizedException from "src/helpers/errors/unauthorized-exception"
-import { ERole } from "src/types/enum"
-import { User } from "src/types/models"
-
+import BadRequestException from "../../helpers/errors/bad-request.exception"
+import RequestValidationException from "../../helpers/errors/request-validation.exception"
+import UnauthorizedException from "../../helpers/errors/unauthorized-exception"
+import { ERole } from "../../types/enum"
+import { User } from "../../types/models"
 import { EmailService } from "../email/email.service"
 import { FirebaseService } from "../firebase/firebase.service"
 import { UserService } from "../users/user.service"
@@ -59,7 +58,6 @@ export class AuthService {
 
     return {
       accessToken: token,
-      phone: user.phone,
       role: user.role,
     }
   }
@@ -119,6 +117,13 @@ export class AuthService {
     const user = await this.verifySetupToken({
       params: { token },
     })
+
+    const existingUser = await this.userService.getUserByUsername(username)
+    if (existingUser) {
+      throw new RequestValidationException({
+        username: "Username already exists",
+      })
+    }
 
     // Hash the password before storing
     const saltRounds = 12

@@ -1,5 +1,5 @@
 import { ERole } from '~/types/models'
-import { Badge } from '../ui/badge'
+import { Badge } from '../badge'
 
 type Props = {
   status: ERole

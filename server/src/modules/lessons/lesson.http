@@ -11,7 +11,7 @@ Content-Type: application/json
 
 ###
 GET http://localhost:5000/api/lessons/my-lessons
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI1YjZjNDdhYi01N2MwLTQ0NTEtOGU0YS1kMWMxYzk2MDY1YTAiLCJpYXQiOjE3NTI4NTgyNTYsImV4cCI6MTc1Mjk0NDY1Nn0.4PyBzkuxz8ggRqBb7vEznp1RRlLwR-ehP2pdH9r30qs
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjN2MwOThiYy00Yjc1LTQ5YjgtOWMzYi1mNzg4ZmUxYjkzMTMiLCJpYXQiOjE3NTI5OTc4ODEsImV4cCI6MTc1MzA4NDI4MX0.-D8nlq9lzsvfgDXcE-k0g0-zm_1eVOfToTU9KusFYSE
 
 ###
 POST http://localhost:5000/api/lessons/mark-lesson-done
@@ -21,6 +21,10 @@ Content-Type: application/json
 {
   "lessonId": "9ec716cc-cbf2-46e0-80ef-b032fabfd506"
 }
+
+###
+GET http://localhost:5000/api/lessons
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJmMzMwMDY1ZS1iODIzLTRjOTEtOTI4YS03ODAzMGFiYzhmOTAiLCJpYXQiOjE3NTI5OTE4NzcsImV4cCI6MTc1MzA3ODI3N30.ThDkff91pbLJHvyFkd571Ka80QQV7v-mVVNSfaTG6ME
 
 
  

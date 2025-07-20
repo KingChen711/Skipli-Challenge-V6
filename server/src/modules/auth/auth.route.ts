@@ -1,9 +1,8 @@
 import express from "express"
 
-import { authorize } from "src/middleware/authorize.middleware"
-import { validateRequestData } from "src/middleware/validate-request-data.middleware"
-
 import { container } from "../../config/inversify.config"
+import { authorize } from "../../middleware/authorize.middleware"
+import { validateRequestData } from "../../middleware/validate-request-data.middleware"
 import { AuthController } from "./auth.controller"
 import {
   authenticateSchema,

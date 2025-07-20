@@ -70,8 +70,9 @@ function TableCell({
   className,
   position = 'left',
   children,
+  cellClassName,
   ...props
-}: React.ComponentProps<'td'> & { position?: 'left' | 'center' | 'right' }) {
+}: React.ComponentProps<'td'> & { position?: 'left' | 'center' | 'right'; cellClassName?: string }) {
   return (
     <td
       data-slot='table-cell'
@@ -85,7 +86,8 @@ function TableCell({
         className={cn(
           'flex items-center',
           position === 'center' && 'justify-center',
-          position === 'right' && 'justify-end'
+          position === 'right' && 'justify-end',
+          cellClassName
         )}
       >
         {children}

@@ -20,20 +20,28 @@ import { useAuth } from '~/contexts/auth-provider'
 import { cn } from '~/lib/utils'
 import { ERole } from '~/types/models'
 
-const managementRoutes = [
+const routes = [
   {
     route: '/lessons',
     label: 'Lessons',
     Icon: (props: { className?: string }) => {
-      return <Icons.Instructor {...props} />
+      return <Icons.Lesson {...props} />
     },
     roles: [ERole.INSTRUCTOR]
+  },
+  {
+    route: '/my-profile',
+    label: 'My Profile',
+    Icon: (props: { className?: string }) => {
+      return <Icons.Profile {...props} />
+    },
+    roles: [ERole.STUDENT]
   },
   {
     route: '/my-lessons',
     label: 'My Lessons',
     Icon: (props: { className?: string }) => {
-      return <Icons.Instructor {...props} />
+      return <Icons.Lesson {...props} />
     },
     roles: [ERole.STUDENT]
   },
@@ -93,7 +101,7 @@ export function ManagementSidebar({ ...props }: ComponentProps<typeof Sidebar>) 
         <SidebarGroup>
           <SidebarGroupLabel> Navigator Bar </SidebarGroupLabel>
           <SidebarMenu>
-            {managementRoutes.map((route) => {
+            {routes.map((route) => {
               if (!route.roles.includes(user!.role)) {
                 return null
               }

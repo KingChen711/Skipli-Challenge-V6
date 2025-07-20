@@ -42,3 +42,8 @@ Content-Type: application/json
   "phone": "0933131499",
   "email": "kingchenobama71103@gmail.com"
 }
+
+###
+GET http://localhost:5000/api/users/students/0933131464/lessons
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJmMzMwMDY1ZS1iODIzLTRjOTEtOTI4YS03ODAzMGFiYzhmOTAiLCJpYXQiOjE3NTI4NDY0MzMsImV4cCI6MTc1MjkzMjgzM30.0brNcNemGHJcUzvFTpX8Bh7teOr1-Qqm9OMaRH5rfYk
+ 

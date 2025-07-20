@@ -1,6 +1,6 @@
 import { z } from "zod"
 
-import { phoneNumberSchema, usernameSchema } from "src/helpers/validation"
+import { phoneNumberSchema, usernameSchema } from "../../helpers/validation"
 
 export const getStudentsSchema = z.object({
   query: z.object({
@@ -56,6 +56,7 @@ export const editProfileSchema = z.object({
     name: z.string().trim().min(3),
     phone: phoneNumberSchema,
     email: z.string().trim().email().toLowerCase().min(1),
+    username: usernameSchema,
   }),
 })
 
