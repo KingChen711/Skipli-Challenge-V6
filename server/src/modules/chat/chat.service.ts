@@ -2,12 +2,17 @@ import { injectable } from "inversify"
 import { v4 as uuidv4 } from "uuid"
 
 import BadRequestException from "../../helpers/errors/bad-request.exception"
+import { PagedList } from "../../helpers/paged-list"
 import { asyncPoolAll } from "../../helpers/utils"
 import { ERole } from "../../types/enum"
 import { Conversation, Message, User } from "../../types/models"
 import { FirebaseService } from "../firebase/firebase.service"
 import { UserService } from "../users/user.service"
-import { TGetMessagesSchema, TSendMessageSchema } from "./chat.validation"
+import {
+  TGetConversationsSchema,
+  TGetMessagesSchema,
+  TSendMessageSchema,
+} from "./chat.validation"
 import { SocketService } from "./socket.service"
 
 @injectable()
@@ -92,11 +97,20 @@ export class ChatService {
     this.socketService.emitMessage(newMessage)
   }
 
-  public getConversations = async (user: User) => {
+  public getConversations = async (
+    user: User,
+    dto: TGetConversationsSchema
+  ) => {
+    const {
+      query: { pageNumber, pageSize },
+    } = dto
+
     const conversations = await this.firebaseService.db
       .collection("conversations")
       .where("yourId", "==", user.id)
       .orderBy("lastMessage.createdAt", "desc")
+      .limit(pageSize)
+      .offset((pageNumber - 1) * pageSize)
       .get()
       .then((snapshot) =>
         snapshot.docs.map(
@@ -113,19 +127,43 @@ export class ChatService {
         )
       )
 
-    return await asyncPoolAll(10, conversations, async (conversation) => {
-      const partner = await this.userService.getUserById(conversation.partnerId)
-      if (!partner) return null
-      return {
-        ...conversation,
-        partner: this.userService.toPublicUser(partner),
+    const totalCount = await this.firebaseService.db
+      .collection("conversations")
+      .where("yourId", "==", user.id)
+      .count()
+      .get()
+      .then((snapshot) => snapshot.data().count)
+
+    const conversationsWithPartners = await asyncPoolAll(
+      10,
+      conversations,
+      async (conversation) => {
+        const partner = await this.userService.getUserById(
+          conversation.partnerId
+        )
+        if (!partner) return null
+        return {
+          ...conversation,
+          partner: this.userService.toPublicUser(partner),
+        }
       }
-    }).then((conversations) => conversations.filter(Boolean))
+    ).then(
+      (conversations) =>
+        conversations.filter(Boolean) as (Conversation & { partner: User })[]
+    )
+
+    return new PagedList<Conversation & { partner: User }>(
+      conversationsWithPartners,
+      totalCount,
+      pageNumber,
+      pageSize
+    )
   }
 
   public getMessages = async (user: User, dto: TGetMessagesSchema) => {
     const {
       params: { partnerId },
+      query: { pageNumber, pageSize },
     } = dto
 
     const conversationId = await this.firebaseService.db
@@ -140,19 +178,30 @@ export class ChatService {
 
     if (!conversationId) return []
 
-    return await this.firebaseService.db
+    const messages = await this.firebaseService.db
       .collection("messages")
       .where("conversationIds", "array-contains", conversationId)
       .orderBy("createdAt", "desc")
+      .limit(pageSize)
+      .offset((pageNumber - 1) * pageSize)
       .get()
       .then((snapshot) =>
         snapshot.docs.map((doc) => ({
-          ...doc.data(),
+          ...(doc.data() as Message),
           createdAt: new Date(
             doc.data().createdAt._seconds * 1000
           ).toISOString(),
         }))
       )
+
+    const totalCount = await this.firebaseService.db
+      .collection("messages")
+      .where("conversationIds", "array-contains", conversationId)
+      .count()
+      .get()
+      .then((snapshot) => snapshot.data().count)
+
+    return new PagedList<Message>(messages, totalCount, pageNumber, pageSize)
   }
 
   public getPotentialChatPartners = async (user: User) => {

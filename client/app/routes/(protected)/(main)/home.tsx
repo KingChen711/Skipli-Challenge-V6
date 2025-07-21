@@ -4,7 +4,7 @@ import { ERole } from '~/types/models'
 import { Navigate } from 'react-router'
 
 export function meta({}: Route.MetaArgs) {
-  return [{ title: 'New React Router App' }, { name: 'description', content: 'Welcome to React Router!' }]
+  return [{ title: 'LearnHub' }, { name: 'description', content: 'Welcome to LearnHub!' }]
 }
 
 export default function Home() {

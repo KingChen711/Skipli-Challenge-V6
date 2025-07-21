@@ -24,7 +24,7 @@ router.post(
   lessonController.assignLesson
 )
 
-//TODO: Add README.md: maybe the intention of the person who proposed this challenge is to use phone as key. But since it can change it in profile, so I don't think it is trustworthy to be key. I will use studentId(userId)
+//TODO: Add README.md: maybe the intention of the person who proposed this challenge is to use phone as key. But since it can be changed in profile, so I don't think it is trustworthy to be key. I will use studentId(userId)
 
 //The studentId can get after authorize. Not need to pass it.
 router.get(

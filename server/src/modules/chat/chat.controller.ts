@@ -18,7 +18,8 @@ export class ChatController {
 
   public getConversations = async (req: Request, res: Response) => {
     const conversations = await this.chatService.getConversations(
-      res.locals.user
+      res.locals.user,
+      res.locals.requestData
     )
     return ok(res, conversations)
   }

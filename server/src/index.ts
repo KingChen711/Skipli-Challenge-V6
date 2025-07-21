@@ -4,7 +4,7 @@ import "express-async-errors"
 
 import http from "http"
 import bodyParser from "body-parser"
-import express, { type NextFunction } from "express"
+import express from "express"
 import helmet from "helmet"
 import morgan from "morgan"
 import { Server, type Socket } from "socket.io"
@@ -15,13 +15,12 @@ import NotFoundException from "./helpers/errors/not-found.exception"
 import { ok } from "./helpers/utils"
 import corsMiddleware from "./middleware/cors.middleware"
 import errorHandlingMiddleware from "./middleware/error-handling.middleware"
+import socketMiddleware from "./middleware/socket.middleware"
 import { authRoute } from "./modules/auth/auth.route"
-import { TokenService } from "./modules/auth/token.service"
 import { chatRoute } from "./modules/chat/chat.route"
 import { SocketService } from "./modules/chat/socket.service"
 import { lessonRoute } from "./modules/lessons/lesson.route"
 import { userRoute } from "./modules/users/user.route"
-import { UserService } from "./modules/users/user.service"
 
 //!Just for development
 const DELAY = 0
@@ -37,33 +36,7 @@ const io = new Server(server, {
   },
 })
 
-//TODO:split to middleware
-io.engine.use(async (req, res, next: NextFunction) => {
-  const isHandshake = req._query.sid === undefined
-  if (!isHandshake) {
-    return next()
-  }
-
-  const token = req.headers.authorization?.split(" ")[1]
-  if (!token) {
-    return next(new Error("Authentication error"))
-  }
-
-  try {
-    const decoded = await container.get(TokenService).verifyToken(token)
-
-    if (!decoded) return next(new Error("Authentication error"))
-
-    const userService = container.get(UserService)
-    const user = await userService.getUserById(decoded.userId)
-    if (!user) return next(new Error("Authentication error"))
-
-    req.user = user
-    next()
-  } catch {
-    return next(new Error("Invalid token"))
-  }
-})
+io.engine.use(socketMiddleware)
 
 app.use((req, res, next) => {
   setTimeout(next, DELAY)

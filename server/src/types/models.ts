@@ -30,7 +30,7 @@ export type Message = {
   content: string
   senderId: string
   receiverId: string
-  createdAt: Date
+  createdAt: Date | string
   conversationIds: string[]
 }
 

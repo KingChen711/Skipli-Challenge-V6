@@ -13,6 +13,19 @@ export const getMessagesSchema = z.object({
   params: z.object({
     partnerId: z.string().trim().min(1),
   }),
+  query: z.object({
+    pageNumber: z.coerce.number().min(1).default(1),
+    pageSize: z.coerce.number().min(1).max(100).default(10),
+  }),
 })
 
 export type TGetMessagesSchema = z.infer<typeof getMessagesSchema>
+
+export const getConversationsSchema = z.object({
+  query: z.object({
+    pageNumber: z.coerce.number().min(1).default(1),
+    pageSize: z.coerce.number().min(1).max(100).default(10),
+  }),
+})
+
+export type TGetConversationsSchema = z.infer<typeof getConversationsSchema>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useLayoutEffect } from 'react'
+import React, { useState, useEffect, useRef, useLayoutEffect, useMemo } from 'react'
 import { format } from 'date-fns'
 import { Send, Plus, Search, Loader2 } from 'lucide-react'
 
@@ -17,6 +17,7 @@ import { useSendMessage } from '~/hooks/messages/use-send-message'
 import { usePotentialPartners } from '~/hooks/messages/use-potential-partners'
 import handleHttpError, { cn } from '~/lib/utils'
 import type { Message, User } from '~/types/models'
+import { useInView } from 'react-intersection-observer'
 
 function Messages() {
   const { user } = useAuth()
@@ -25,40 +26,71 @@ function Messages() {
   const [messageText, setMessageText] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
   const [isNewChatOpen, setIsNewChatOpen] = useState(false)
-  const messagesEndRef = useRef<HTMLDivElement>(null)
-  const messagesInputRef = useRef<HTMLInputElement>(null)
+  const bottomRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const prevScrollHeightRef = useRef<number>(0)
   const [newMessages, setNewMessages] = useState<Message[]>([])
 
+  const { ref: refConversationBottom, inView: inViewConversationBottom } = useInView()
+
   const {
-    data: conversationsData = [],
+    data: conversationsData,
     isLoading: isLoadingConversations,
+    fetchNextPage: fetchNextConversations,
+    hasNextPage: hasNextConversationsPage,
+    isFetchingNextPage: isFetchingNextConversations,
     refetch: refetchConversations
   } = useConversations()
-  const { data: messages = [], isLoading: isLoadingMessages } = useMessages(selectedConversation?.partner.id || null)
+
+  const {
+    data: messagesData,
+    isLoading: isLoadingMessages,
+    fetchNextPage: fetchNextMessages,
+    hasNextPage: hasNextMessagesPage,
+    isFetchingNextPage: isFetchingNextMessages
+  } = useMessages(selectedConversation?.partner.id || null)
+
   const { data: potentialPartners = [], isLoading: isLoadingPotentialPartners } = usePotentialPartners(isNewChatOpen)
   const { mutateAsync: sendMessage, isPending: isSendingMessage } = useSendMessage()
   const [conversations, setConversations] = useState<ConversationWithPartner[]>([])
 
+  const allConversations = useMemo(
+    () => conversationsData?.pages.flatMap((page) => page.items) || [],
+    [conversationsData]
+  )
+
+  const allMessages = useMemo(
+    () => messagesData?.pages.flatMap((page) => page.items).reverse() || [],
+    [messagesData?.pages]
+  )
+
   useEffect(() => {
     if (isLoadingConversations) return
-    console.log(conversationsData)
-
-    setConversations(conversationsData)
-  }, [conversationsData, isLoadingConversations])
+    setConversations(allConversations)
+  }, [allConversations, isLoadingConversations])
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView()
+    bottomRef.current?.scrollIntoView()
   }
 
   useEffect(() => {
-    if (!isSendingMessage) {
-      messagesInputRef.current?.focus()
-    }
+    if (isSendingMessage) return
+    inputRef.current?.focus()
   }, [isSendingMessage, selectedConversation])
 
   useLayoutEffect(() => {
     scrollToBottom()
-  }, [messages, newMessages])
+  }, [newMessages])
+
+  useLayoutEffect(() => {
+    if (allMessages.length <= 20) scrollToBottom()
+  }, [allMessages])
+
+  useLayoutEffect(() => {
+    if (!containerRef.current) return
+    containerRef.current.scrollTop = containerRef.current.scrollHeight - prevScrollHeightRef.current
+  }, [allMessages])
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -100,9 +132,8 @@ function Messages() {
   useEffect(() => {
     if (!isConnected || !socket) return
     socket.on('message', (message: Message) => {
-      console.log(message)
       if (selectedConversation?.id && message.conversationIds.includes(selectedConversation.id)) {
-        setNewMessages((prev) => [message, ...prev])
+        setNewMessages((prev) => [...prev, message])
       }
 
       const conversationIndex = conversations.findIndex((conv) => conv.partner.id === message.receiverId)
@@ -129,6 +160,30 @@ function Messages() {
   useEffect(() => {
     setNewMessages([])
   }, [selectedConversation])
+
+  useEffect(() => {
+    if (inViewConversationBottom && hasNextConversationsPage && !isFetchingNextConversations) {
+      fetchNextConversations()
+    }
+  }, [fetchNextConversations, hasNextConversationsPage, inViewConversationBottom, isFetchingNextConversations])
+
+  useEffect(() => {
+    const container = containerRef.current
+    if (!container) return
+
+    const handleScroll = () => {
+      if (container.scrollTop < 100 && hasNextMessagesPage && !isFetchingNextMessages) {
+        prevScrollHeightRef.current = container.scrollHeight
+        fetchNextMessages()
+      }
+    }
+
+    container.addEventListener('scroll', handleScroll)
+
+    return () => {
+      container.removeEventListener('scroll', handleScroll)
+    }
+  }, [hasNextMessagesPage, isFetchingNextMessages, fetchNextMessages])
 
   return (
     <div className='flex h-[calc(100vh-64px)] bg-background'>
@@ -263,6 +318,9 @@ function Messages() {
                     </div>
                   </div>
                 ))}
+
+                {/* Load more conversations */}
+                {hasNextConversationsPage && <div ref={refConversationBottom}></div>}
               </div>
             )}
           </div>
@@ -290,46 +348,48 @@ function Messages() {
               </div>
             </div>
 
-            <ScrollArea className='flex-1 p-4 max-h-[calc(100vh-210px)]'>
-              <div className='flex gap-4 flex-col-reverse'>
+            <div className='flex-1 p-4 max-h-[calc(100vh-210px)] overflow-y-auto' ref={containerRef}>
+              <div className='flex gap-4 flex-col'>
                 {isLoadingMessages && (
                   <div className='flex justify-center items-center h-full py-8'>
                     <Loader2 className='size-8 animate-spin' />
                   </div>
                 )}
-                {!isLoadingMessages && messages.length === 0 && newMessages.length === 0 ? (
+                {!isLoadingMessages && allMessages.length === 0 && newMessages.length === 0 ? (
                   <div className='text-center py-8 text-muted-foreground'>
                     <p>No messages yet</p>
                     <p className='text-sm'>Send a message to start the conversation</p>
                   </div>
                 ) : (
-                  [...newMessages, ...messages].map((message) => {
-                    const isOwnMessage = message.senderId === user?.id
-                    return (
-                      <div key={message.id} className={cn('flex', isOwnMessage ? 'justify-end' : 'justify-start')}>
-                        <div
-                          className={cn(
-                            'max-w-[70%] rounded-lg px-4 py-2',
-                            isOwnMessage ? 'bg-primary text-primary-foreground' : 'bg-muted'
-                          )}
-                        >
-                          <p className='text-sm'>{message.content}</p>
-                          <p
+                  <>
+                    {[...allMessages, ...newMessages].map((message) => {
+                      const isOwnMessage = message.senderId === user?.id
+                      return (
+                        <div key={message.id} className={cn('flex', isOwnMessage ? 'justify-end' : 'justify-start')}>
+                          <div
                             className={cn(
-                              'text-xs mt-1',
-                              isOwnMessage ? 'text-primary-foreground/70' : 'text-muted-foreground'
+                              'max-w-[70%] rounded-lg px-4 py-2',
+                              isOwnMessage ? 'bg-primary text-primary-foreground' : 'bg-muted'
                             )}
                           >
-                            {format(new Date(message.createdAt), 'HH:mm')}
-                          </p>
+                            <p className='text-sm'>{message.content}</p>
+                            <p
+                              className={cn(
+                                'text-xs mt-1',
+                                isOwnMessage ? 'text-primary-foreground/70' : 'text-muted-foreground'
+                              )}
+                            >
+                              {format(new Date(message.createdAt), 'HH:mm')}
+                            </p>
+                          </div>
                         </div>
-                      </div>
-                    )
-                  })
+                      )
+                    })}
+                  </>
                 )}
               </div>
-              <div ref={messagesEndRef} />
-            </ScrollArea>
+              <div ref={bottomRef} />
+            </div>
 
             <div className='p-4 border-t border-border'>
               <form onSubmit={handleSendMessage} className='flex gap-2'>
@@ -339,7 +399,7 @@ function Messages() {
                   placeholder='Type a message...'
                   className='flex-1'
                   disabled={isSendingMessage}
-                  ref={messagesInputRef}
+                  ref={inputRef}
                 />
                 <Button type='submit' size='icon' disabled={!messageText.trim() || isSendingMessage}>
                   <Send className='h-4 w-4' />
