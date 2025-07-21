@@ -143,8 +143,6 @@ const request = async <TData = undefined>(
 
     return payload as HttpResponse<TData>
   } catch (error: unknown) {
-    console.log(' http http Hello', error)
-
     if (!(error instanceof FetchError) || error.type === 'unknown') {
       return {
         success: false,

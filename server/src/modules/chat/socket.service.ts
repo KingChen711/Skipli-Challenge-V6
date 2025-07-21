@@ -22,8 +22,6 @@ export class SocketService {
   }
 
   public emitMessage(message: Message) {
-    console.log("emitting message", message)
-
     io.to(`user:${message.senderId}`).emit("message", message)
     io.to(`user:${message.receiverId}`).emit("message", message)
   }

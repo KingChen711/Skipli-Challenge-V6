@@ -132,7 +132,11 @@ function Messages() {
   useEffect(() => {
     if (!isConnected || !socket) return
     socket.on('message', (message: Message) => {
-      if (selectedConversation?.id && message.conversationIds.includes(selectedConversation.id)) {
+      //The conversationId can be null if is a new conversation, so we will check by the partnerId
+      if (
+        selectedConversation?.partnerId &&
+        [message.senderId, message.receiverId].includes(selectedConversation.partnerId)
+      ) {
         setNewMessages((prev) => [...prev, message])
       }
 
@@ -363,6 +367,7 @@ function Messages() {
                 ) : (
                   <>
                     {[...allMessages, ...newMessages].map((message) => {
+                      if (!message) return null
                       const isOwnMessage = message.senderId === user?.id
                       return (
                         <div key={message.id} className={cn('flex', isOwnMessage ? 'justify-end' : 'justify-start')}>

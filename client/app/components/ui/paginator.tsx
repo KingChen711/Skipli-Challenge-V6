@@ -79,8 +79,6 @@ function Paginator({
       }
     })
 
-    console.log({ newUrl })
-
     setOpen(false)
     navigate(newUrl, { replace: true })
   }

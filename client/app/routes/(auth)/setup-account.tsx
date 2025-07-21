@@ -50,7 +50,7 @@ function SetupAccount() {
     return <Navigate to='/404' replace />
   }
 
-  if (!data) {
+  if (!isPending && !data) {
     return <Navigate to='/404' replace />
   }
 
@@ -64,7 +64,7 @@ function SetupAccount() {
               <Skeleton className='h-4 w-full' />
             ) : (
               <>
-                Hi <strong>{data.name}</strong>, please enter username and password to complete account setup
+                Hi <strong>{data!.name}</strong>, please enter username and password to complete account setup
               </>
             )}
           </CardDescription>

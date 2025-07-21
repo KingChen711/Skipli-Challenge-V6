@@ -12,8 +12,6 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 function handleHttpError(error: HttpError, form?: UseFormReturn<any, any, any>) {
-  console.log({ error })
-
   if (error.typeError === 'error') {
     toast.error(error.messageError)
     return

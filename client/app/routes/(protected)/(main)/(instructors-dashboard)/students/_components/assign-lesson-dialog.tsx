@@ -1,7 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useQueryClient } from '@tanstack/react-query'
 import { Loader2 } from 'lucide-react'
-import { useEffect } from 'react'
+
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { Button } from '~/components/ui/button'
@@ -44,16 +44,6 @@ function AssignLessonDialog({ studentPhone, openAssign, setOpenAssign }: Props) 
       studentPhones: [{ phone: studentPhone }]
     }
   })
-
-  const studentPhonesValues = form.watch('studentPhones')
-
-  useEffect(() => {
-    console.log({ studentPhonesValues })
-  }, [studentPhonesValues])
-
-  useEffect(() => {
-    console.log(form.formState.errors)
-  }, [form.formState.errors])
 
   const onSubmit = async (values: TAssignLessonSchema) => {
     const res = await assignLesson(values)

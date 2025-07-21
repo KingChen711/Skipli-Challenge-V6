@@ -28,7 +28,6 @@ const authorize =
 
     const hasPermission = roles.includes(user.role as ERole)
     if (!hasPermission) {
-      console.log("Hello")
       throw new ForbiddenException("You have no permission for this action")
     }
 

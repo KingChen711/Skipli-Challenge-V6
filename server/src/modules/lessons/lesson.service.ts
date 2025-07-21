@@ -78,7 +78,7 @@ export class LessonService {
     )
 
     const lessons =
-      //TODO: Add reason why I use asyncPoolAll instead "in" query in README.md
+      //Firebase "in" query is limited to 10 items, so we need to use asyncPoolAll to get all lessons
       (
         await asyncPoolAll(
           10,
