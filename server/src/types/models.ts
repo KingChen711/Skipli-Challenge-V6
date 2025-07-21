@@ -31,4 +31,13 @@ export type Message = {
   senderId: string
   receiverId: string
   createdAt: Date
+  conversationIds: string[]
+}
+
+export type Conversation = {
+  id: string
+  yourId: string
+  partnerId: string
+  lastMessage: Message
+  unreadCount: number
 }

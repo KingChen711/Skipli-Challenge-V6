@@ -8,3 +8,11 @@ export const sendMessageSchema = z.object({
 })
 
 export type TSendMessageSchema = z.infer<typeof sendMessageSchema>
+
+export const getMessagesSchema = z.object({
+  params: z.object({
+    partnerId: z.string().trim().min(1),
+  }),
+})
+
+export type TGetMessagesSchema = z.infer<typeof getMessagesSchema>

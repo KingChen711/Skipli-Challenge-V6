@@ -26,3 +26,19 @@ export enum EStudentLessonStatus {
   PENDING = 'pending',
   COMPLETED = 'completed'
 }
+
+export type Message = {
+  id: string
+  content: string
+  senderId: string
+  receiverId: string
+  createdAt: Date | string
+}
+
+export type Conversation = {
+  id: string
+  yourId: string
+  partnerId: string
+  lastMessage: Message
+  unreadCount: number
+}

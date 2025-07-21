@@ -1,11 +1,13 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Navigate, Outlet } from 'react-router'
-import ManagementNavbar from './_components/main-navbar'
+
 import { SidebarProvider } from '~/components/ui/sidebar'
 import { useAuth } from '~/contexts/auth-provider'
+import { SocketProvider } from '~/contexts/socket-provider'
 
-import { ManagementSidebar } from './_components/main-sidebar'
 import SplashScreen from '~/components/ui/splash-screen'
+import ManagementNavbar from './(main)/_components/main-navbar'
+import { ManagementSidebar } from './(main)/_components/main-sidebar'
 
 function Layout() {
   const { user, isLoadingAuth } = useAuth()
@@ -30,19 +32,17 @@ function Layout() {
   }
 
   return (
-    <SidebarProvider defaultOpen>
-      <div className='relative w-full'>
-        <ManagementNavbar />
-        <div className='flex w-full'>
-          <ManagementSidebar />
-          <section className='flex min-h-screen flex-1 flex-col p-6 pt-[88px]'>
-            <div className='mx-auto w-full max-w-[1620px]'>
-              <Outlet />
-            </div>
-          </section>
+    <SocketProvider>
+      <SidebarProvider defaultOpen>
+        <div className='relative w-full'>
+          <ManagementNavbar />
+          <div className='flex w-full'>
+            <ManagementSidebar />
+            <Outlet />
+          </div>
         </div>
-      </div>
-    </SidebarProvider>
+      </SidebarProvider>
+    </SocketProvider>
   )
 }
 

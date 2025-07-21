@@ -4,7 +4,7 @@ import { container } from "../../config/inversify.config"
 import { authorize } from "../../middleware/authorize.middleware"
 import { validateRequestData } from "../../middleware/validate-request-data.middleware"
 import { ChatController } from "./chat.controller"
-import { sendMessageSchema } from "./chat.validation"
+import { getMessagesSchema, sendMessageSchema } from "./chat.validation"
 
 const router = express.Router()
 
@@ -15,6 +15,21 @@ router.post(
   authorize(),
   validateRequestData(sendMessageSchema),
   chatController.sendMessage
+)
+
+router.get("/conversations", authorize(), chatController.getConversations)
+
+router.get(
+  "/messages/:partnerId",
+  authorize(),
+  validateRequestData(getMessagesSchema),
+  chatController.getMessages
+)
+
+router.get(
+  "/potential-partners",
+  authorize(),
+  chatController.getPotentialChatPartners
 )
 
 export { router as chatRoute }

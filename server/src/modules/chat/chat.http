@@ -1,9 +1,9 @@
 ###
 POST http://localhost:5000/api/chat/send-message
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI1YjZjNDdhYi01N2MwLTQ0NTEtOGU0YS1kMWMxYzk2MDY1YTAiLCJpYXQiOjE3NTI4NTgyNTYsImV4cCI6MTc1Mjk0NDY1Nn0.4PyBzkuxz8ggRqBb7vEznp1RRlLwR-ehP2pdH9r30qs
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJiODY1OTQ0Ni0yMmQ5LTRlZWMtYTYzZC0xZjU5MDBiM2E1NjYiLCJpYXQiOjE3NTMwMDk5OTEsImV4cCI6MTc1MzA5NjM5MX0.SPNv5blsJkQIV9eeAuUfJWOLycKzJBxFgocjQps72PQ
 Content-Type: application/json
 
 {
   "receiverId": "7f4b48c7-0241-4852-ae54-fd5d2261f4a9",
-  "content": "Hello"
+  "content": "Nice to meet you"
 }
