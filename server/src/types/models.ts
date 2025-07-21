@@ -39,5 +39,4 @@ export type Conversation = {
   yourId: string
   partnerId: string
   lastMessage: Message
-  unreadCount: number
 }

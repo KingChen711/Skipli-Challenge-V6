@@ -8,10 +8,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '~/components/ui/dialog'
 import { ScrollArea } from '~/components/ui/scroll-area'
 import { Avatar, AvatarFallback } from '~/components/ui/avatar'
-import { Badge } from '~/components/ui/badge'
+
 import { useAuth } from '~/contexts/auth-provider'
 import { useSocket } from '~/contexts/socket-provider'
-import { useConversations, type TConversation } from '~/hooks/messages/use-conversations'
+import { useConversations, type ConversationWithPartner } from '~/hooks/messages/use-conversations'
 import { useMessages } from '~/hooks/messages/use-messages'
 import { useSendMessage } from '~/hooks/messages/use-send-message'
 import { usePotentialPartners } from '~/hooks/messages/use-potential-partners'
@@ -21,7 +21,7 @@ import type { Message, User } from '~/types/models'
 function Messages() {
   const { user } = useAuth()
   const { isConnected, socket } = useSocket()
-  const [selectedConversation, setSelectedConversation] = useState<TConversation | null>(null)
+  const [selectedConversation, setSelectedConversation] = useState<ConversationWithPartner | null>(null)
   const [messageText, setMessageText] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
   const [isNewChatOpen, setIsNewChatOpen] = useState(false)
@@ -30,13 +30,21 @@ function Messages() {
   const [newMessages, setNewMessages] = useState<Message[]>([])
 
   const {
-    data: conversations = [],
+    data: conversationsData = [],
     isLoading: isLoadingConversations,
     refetch: refetchConversations
   } = useConversations()
   const { data: messages = [], isLoading: isLoadingMessages } = useMessages(selectedConversation?.partner.id || null)
   const { data: potentialPartners = [], isLoading: isLoadingPotentialPartners } = usePotentialPartners(isNewChatOpen)
   const { mutateAsync: sendMessage, isPending: isSendingMessage } = useSendMessage()
+  const [conversations, setConversations] = useState<ConversationWithPartner[]>([])
+
+  useEffect(() => {
+    if (isLoadingConversations) return
+    console.log(conversationsData)
+
+    setConversations(conversationsData)
+  }, [conversationsData, isLoadingConversations])
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView()
@@ -66,12 +74,11 @@ function Messages() {
   }
 
   const handleStartNewChat = (partner: User) => {
-    const newConversation: TConversation = {
+    const newConversation: ConversationWithPartner = {
       id: '',
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       //@ts-ignore
       lastMessage: null,
-      unreadCount: 0,
       partner,
       yourId: user!.id,
       partnerId: partner.id
@@ -94,14 +101,34 @@ function Messages() {
     if (!isConnected || !socket) return
     socket.on('message', (message: Message) => {
       console.log(message)
-      setNewMessages((prev) => [message, ...prev])
-      refetchConversations()
+      if (selectedConversation?.id && message.conversationIds.includes(selectedConversation.id)) {
+        setNewMessages((prev) => [message, ...prev])
+      }
+
+      const conversationIndex = conversations.findIndex((conv) => conv.partner.id === message.receiverId)
+
+      if (conversationIndex === -1) {
+        refetchConversations()
+        return
+      }
+
+      const conversation = conversations[conversationIndex]
+      conversation.lastMessage = message
+      setConversations((prev) => {
+        const clone = structuredClone(prev)
+        clone.splice(conversationIndex, 1)
+        return [conversation, ...clone]
+      })
     })
 
     return () => {
       socket.off('message')
     }
-  }, [socket, isConnected, refetchConversations])
+  }, [socket, isConnected, refetchConversations, conversations, selectedConversation])
+
+  useEffect(() => {
+    setNewMessages([])
+  }, [selectedConversation])
 
   return (
     <div className='flex h-[calc(100vh-64px)] bg-background'>
@@ -232,11 +259,6 @@ function Messages() {
                           {conversation.lastMessage?.senderId === user?.id ? 'You: ' : null}
                           {conversation.lastMessage?.content || 'No messages yet'}
                         </p>
-                        {conversation.unreadCount > 0 && (
-                          <Badge variant='destructive' className='h-5 w-5 p-0 text-xs'>
-                            {conversation.unreadCount}
-                          </Badge>
-                        )}
                       </div>
                     </div>
                   </div>

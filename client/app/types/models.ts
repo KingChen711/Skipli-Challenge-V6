@@ -33,6 +33,7 @@ export type Message = {
   senderId: string
   receiverId: string
   createdAt: Date | string
+  conversationIds: string[]
 }
 
 export type Conversation = {
@@ -40,5 +41,4 @@ export type Conversation = {
   yourId: string
   partnerId: string
   lastMessage: Message
-  unreadCount: number
 }

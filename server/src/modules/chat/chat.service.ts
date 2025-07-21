@@ -73,7 +73,6 @@ export class ChatService {
           yourId: sender.id,
           partnerId: receiverId,
           lastMessage: newMessage,
-          unreadCount: 0,
         }),
       this.firebaseService.db
         .collection("conversations")
@@ -83,7 +82,6 @@ export class ChatService {
           yourId: receiverId,
           partnerId: sender.id,
           lastMessage: newMessage,
-          unreadCount: 0,
         }),
       this.firebaseService.db
         .collection("messages")
