@@ -176,7 +176,8 @@ export class ChatService {
         snapshot.docs.length > 0 ? (snapshot.docs[0].id as string) : null
       )
 
-    if (!conversationId) return []
+    if (!conversationId)
+      return new PagedList<Message>([], 0, pageNumber, pageSize)
 
     const messages = await this.firebaseService.db
       .collection("messages")

@@ -20,7 +20,7 @@ export class UserController {
     const student = await this.userService.getStudentByPhone(
       res.locals.requestData.params.phone
     )
-    return ok(res, student)
+    return ok(res, student ? this.userService.toPublicUser(student) : null)
   }
 
   public addStudent = async (req: Request, res: Response) => {

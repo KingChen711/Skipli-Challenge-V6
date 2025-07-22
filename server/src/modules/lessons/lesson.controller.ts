@@ -12,8 +12,8 @@ export class LessonController {
   ) {}
 
   public assignLesson = async (req: Request, res: Response) => {
-    const a = await this.lessonService.assignLesson(res.locals.requestData)
-    return ok(res, a)
+    await this.lessonService.assignLesson(res.locals.requestData)
+    return ok(res)
   }
 
   public getMyLessons = async (req: Request, res: Response) => {

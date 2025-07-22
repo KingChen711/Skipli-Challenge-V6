@@ -198,7 +198,9 @@ export class LessonService {
             .then((snapshot) =>
               snapshot.docs.length > 0
                 ? ({
-                    ...snapshot.docs[0].data(),
+                    ...this.userService.toPublicUser(
+                      snapshot.docs[0].data() as User
+                    ),
                     status: studentLesson.status,
                   } as TStudentLesson)
                 : null
